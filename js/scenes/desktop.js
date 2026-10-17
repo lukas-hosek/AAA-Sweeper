@@ -70,7 +70,7 @@ async function launch(){
   const r=w.getBoundingClientRect();w.style.left=(innerWidth-r.width)/2+'px';w.style.top=Math.max(8,(innerHeight-30-r.height)/2)+'px';
   const msg=$('#l-msg'),sub=$('#l-sub'),bar=$('#l-bar');
   const step=async(m,ms,fn)=>{msg.textContent=m;bar.style.width='0%';await tween(ms,p=>{bar.style.width=(p*100)+'%';sub.textContent=fn?fn(p):' ';});};
-  await step('Checking for launcher updates…',650,p=>'Updating the launcher for the launcher');
+  await step('Checking for launcher updates…',650,()=>'Updating the launcher for the launcher');
   await step('Downloading day-one patch…',1700,p=>`${(74.2*p).toFixed(1)} GB of 74.2 GB · ${Math.round(900+Math.random()*500)} MB/s`);
   await step('Compiling shaders…',1500,p=>`${Math.floor(48213*p).toLocaleString('en-US')} / 48,213`);
   await step('Installing kernel-level anti-cheat for a single-player game…',700);

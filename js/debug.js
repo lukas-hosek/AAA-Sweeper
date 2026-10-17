@@ -1,5 +1,5 @@
 // debug.js — test and tooling hooks. Loaded only when the URL contains ?debug (see main.js).
-// Used by tools/browser/*.mjs (smoke tests, screenshots) and tools/ost/render-ost.mjs (soundtrack export).
+// Used by tools/browser/*.py (smoke tests, screenshots) and tools/ost/render_ost.py (soundtrack export).
 import {ST} from './core/shared.js';
 import {A,audioInit,makeIR,curve} from './audio/engine.js';
 import {MUS,STEP,musicStep} from './audio/music.js';

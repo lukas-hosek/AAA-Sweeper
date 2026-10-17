@@ -1,0 +1,66 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start dev server",
+      "detail": "scripts/startup.sh: http://localhost:8080 in the background (no-op if already running)",
+      "type": "shell",
+      "command": "./scripts/startup.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Stop dev server",
+      "detail": "scripts/shutdown.sh",
+      "type": "shell",
+      "command": "./scripts/shutdown.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Open in browser",
+      "detail": "Start the dev server if needed, then open the game in the default browser",
+      "type": "shell",
+      "command": "xdg-open http://localhost:8080/",
+      "dependsOn": "Start dev server",
+      "problemMatcher": []
+    },
+    {
+      "label": "Smoke test",
+      "detail": "scripts/smoke.sh: headless play-through, must end with \"all good\"",
+      "type": "shell",
+      "command": "./scripts/smoke.sh",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Smoke test (mobile)",
+      "detail": "scripts/smoke.sh --mobile: 390x844 touch phone",
+      "type": "shell",
+      "command": "./scripts/smoke.sh --mobile",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint (Biome)",
+      "detail": "biome lint: correctness check of js/ and css/ (never formats)",
+      "type": "shell",
+      "command": "biome lint",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Bake voices",
+      "detail": "scripts/bake_voices.sh: generate voice lines that have no MP3 yet",
+      "type": "shell",
+      "command": "./scripts/bake_voices.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Check voices",
+      "detail": "scripts/bake_voices.sh --check: lines.py / MP3 / manifest consistency",
+      "type": "shell",
+      "command": "./scripts/bake_voices.sh --check",
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}

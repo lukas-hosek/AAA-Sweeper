@@ -21,7 +21,7 @@ export function gameUpdate(t,dt){
   ST.G.shake=Math.max(0,ST.G.shake-dt*45);ST.G.flash=Math.max(0,ST.G.flash-dt*2.2);
   if(ST.G.paused){updateHUDframe();return;}
   ST.G.clock+=dt;if(ST.G.started&&!ST.G.over&&!ST.G.dead)ST.G.elapsed+=dt;
-  for(let k=ST.G.sched.length-1;k>=0;k--){if(ST.G.sched[k].at<=ST.G.clock){const s=ST.G.sched[k];ST.G.sched.splice(k,1);try{s.fn();}catch(e){}}}
+  for(let k=ST.G.sched.length-1;k>=0;k--){if(ST.G.sched[k].at<=ST.G.clock){const s=ST.G.sched[k];ST.G.sched.splice(k,1);try{s.fn();}catch{}}}
   if(!ST.G.dead&&ST.G.clock-ST.G.lastHit>(PROFILE.perks.wind?1.5:3)&&ST.G.hp<100)ST.G.hp=Math.min(100,ST.G.hp+24*dt);
   if(ST.G.hpTrail>ST.G.hp){if(ST.G.clock-ST.G.lastHit>.6)ST.G.hpTrail=Math.max(ST.G.hp,ST.G.hpTrail-55*dt);}else ST.G.hpTrail=ST.G.hp;
   const low=ST.G.hp<40&&!ST.G.over&&!ST.G.dead;$('#game').classList.toggle('lowhp',low);

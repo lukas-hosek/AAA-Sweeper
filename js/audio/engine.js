@@ -9,7 +9,7 @@ export const A={ctx:null,buffers:{},pending:{},lru:[]};
 export function audioInit(){
   if(A.ctx){if(A.ctx.state==='suspended')A.ctx.resume();return;}
   const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return;
-  let ctx; try{ctx=new AC();}catch(e){return;}
+  let ctx; try{ctx=new AC();}catch{return;}
   A.ctx=ctx;
   const comp=ctx.createDynamicsCompressor(); comp.threshold.value=-12; comp.knee.value=8; comp.ratio.value=4; comp.attack.value=.004; comp.release.value=.25; comp.connect(ctx.destination);
   A.master=ctx.createGain(); A.master.gain.value=settings.muted?0:settings.master; A.comp=comp; A.muf=ctx.createBiquadFilter(); A.muf.type='lowpass'; A.muf.frequency.value=20000; A.master.connect(A.muf); A.muf.connect(comp);

@@ -1,7 +1,24 @@
-node_modules/
-dist/
-out/
+# Python: virtual environment and bytecode caches
 .venv/
+__pycache__/
+*.pyc
+
+# Generated output: smoke-test screenshots, soundtrack export (WAV/MP3/FLAC/zips), TTS previews, dev-server log
+out/
+
+# Kokoro TTS model files (~120 MB, downloaded by scripts/setup.sh) and interrupted downloads
 tools/tts/models/
+*.part
+
+# Audio intermediates. The baked voice lines are committed as MP3 in assets/voices/.
 *.wav
+
+# Editors and operating systems (.vscode/ holds shared project settings and is committed)
 .DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+
+# Claude Code personal settings (the shared project instructions in .claude/CLAUDE.md are committed)
+.claude/settings.local.json

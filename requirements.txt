@@ -1,0 +1,25 @@
+# Python packages for the project tools, installed into .venv by scripts/setup.sh.
+# Every version is pinned exactly, dependencies included, so a fresh setup gets the tested set.
+# Direct dependencies:
+#   playwright   browser tests, screenshots, soundtrack render (tools/browser, tools/ost)
+#   kokoro-onnx, soundfile, numpy   voice-line TTS (tools/tts)
+# The dev server (tools/serve.py) and the soundtrack encoder use only the standard library.
+attrs==26.1.0
+cffi==2.1.1
+cloudpickle==3.1.2
+dlinfo==2.0.0
+espeakng-loader==0.2.4
+flatbuffers==25.12.19
+greenlet==3.5.6
+joblib==1.6.0
+kokoro-onnx==0.6.1
+numpy==2.5.4
+onnxruntime==1.31.0
+packaging==26.3
+phonemizer==3.4.0
+playwright==1.63.0
+protobuf==7.36.2
+pycparser==3.11
+pyee==13.0.1
+soundfile==0.14.0
+typing_extensions==4.16.0

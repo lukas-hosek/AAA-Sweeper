@@ -144,12 +144,15 @@ All instruments write to `A.duck` (the music bus) plus a reverb send, so radio d
 
 ## 6. Exporting the soundtrack
 
-```
-npm run ost:cover    # out/ost/cover.jpg (title screen, square)
-npm run ost          # render every theme to WAV, then encode
+```bash
+scripts/export_ost.sh                 # cover, render every theme to WAV, encode, zip
+scripts/export_ost.sh pathos club     # selected themes only
 ```
 
-- **`tools/ost/render-ost.mjs`:** opens the game headless with `?debug` and calls `window.__render(theme, steps, 10)`.
+Everything goes to `out/ost/`, which is not committed. The script runs three tools in order:
+
+- **`tools/ost/make_cover.py`:** the album cover `out/ost/cover.jpg`, a square shot of the title screen.
+- **`tools/ost/render_ost.py`:** opens the game headless with `?debug` and calls `window.__render(theme, steps, 10)`.
   - That function (in `js/debug.js`) swaps `A.ctx` for an `OfflineAudioContext` and rebuilds the music bus and reverbs on it.
   - It calls `musicStep()` for every step up front, renders faster than real time and peak-normalises to −1 dBFS.
   - It writes a 24-bit / 48 kHz WAV to `out/ost/wav/`.
@@ -165,8 +168,8 @@ npm run ost          # render every theme to WAV, then encode
 2. Add data: `PROG.mytheme` (one chord per bar) and any melody arrays.
 3. Add an `else if (mode === 'mytheme') { ... }` branch to `musicStep(mode, s, t)`. Derive `bar`/`st` from `s`, play instruments at time `t`, and send to `A.duck` (and `A.sendM` or `A.sendL` for reverb). Keep any randomness inside the step.
 4. Use it: set `mus: 'mytheme'` on a chapter in `js/data/fields.js`, or call `musicStart('mytheme')`.
-5. Add its cycle length to `CYCLE` in `tools/ost/render-ost.mjs` and a title to `TRACKS` in `tools/ost/encode_ost.py`.
-6. Listen in the browser (`npm run dev`, then use the chapter select). Claude can't hear it, but it can render it with `node tools/ost/render-ost.mjs mytheme` and check loudness and a spectrogram.
+5. Add its cycle length to `CYCLE` in `tools/ost/render_ost.py` and a title to `TRACKS` in `tools/ost/encode_ost.py`.
+6. Listen in the browser (`scripts/startup.sh`, open http://localhost:8080, then use the chapter select). Claude can't hear it, but it can render it with `.venv/bin/python tools/ost/render_ost.py mytheme` and check loudness and a spectrogram.
 
 **Tips:**
 - Keep each step light. The club schedules about 15 nodes per 16th note, which is comfortable.

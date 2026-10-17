@@ -1,5 +1,0 @@
-# Python packages for the voice pipeline (tools/tts). Install into a virtual environment:
-#   python3 -m venv .venv && . .venv/bin/activate && pip install -r tools/tts/requirements.txt
-kokoro-onnx==0.6.1      # Kokoro-82M TTS on ONNX Runtime (pulls in onnxruntime, phonemizer, espeakng-loader)
-soundfile>=0.12         # WAV writing
-numpy>=1.26

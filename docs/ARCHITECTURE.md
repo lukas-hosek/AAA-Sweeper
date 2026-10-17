@@ -6,16 +6,18 @@ Triple A Sweeper is plain JavaScript in the browser:
 - **Sound:** all music and sound effects are synthesised live with the Web Audio API.
 - **Voices:** the only recorded assets are the 197 voice lines (MP3), generated offline with a TTS model.
 
-The code started life as one 265 KB HTML file. It was split mechanically into ES modules (see §9), so most functions keep their original, compact style.
+The code started life as one 265 KB HTML file. It was split mechanically into ES modules (see §3, "How the split was made"), so most functions keep their original, compact style.
 
 ```
 index.html            markup for every screen + <link>s to css/ + <script type="module" src="js/main.js">
 css/                  stylesheets (order matters, see index.html)
 js/                   ES modules (below)
-public/voices/        197 voice MP3s, fetched at runtime by id
-public/favicon.svg
 assets/fonts/         self-hosted Google Fonts (woff2, OFL licences)
+assets/voices/        197 voice MP3s, fetched at runtime by id
+assets/favicon.svg
 ```
+
+These four items (`index.html`, `css/`, `js/`, `assets/`) are the whole game. There is no build step (§9).
 
 ## 1. Module map
 
@@ -59,7 +61,7 @@ assets/fonts/         self-hosted Google Fonts (woff2, OFL licences)
 | | `particles.js` | Particle system and explosions |
 | | `draw-game.js` | `drawGame()`: background, board, marker, particles, post effects |
 | | `hud-canvas.js` | Compass, minimap and radar, radio waveform |
-| | `main.js` | Imports every module in a fixed order, starts the render loop |
+| *(js/ itself)* | `main.js` | Imports every module in a fixed order, starts the render loop |
 | | `debug.js` | Test hooks (`window.__t`, `window.__render`), loaded only with `?debug` |
 
 Every module starts with a one-line comment saying what it is for.
@@ -97,6 +99,8 @@ Everything else is a normal `export`. Objects that are mutated but never reassig
 **Rule:** if you add a module-level `let` that other modules need to *assign*, put it on `ST`. Reading an exported `let` from another module is fine, because live bindings update.
 
 **Module evaluation order.** `main.js` imports the modules in the order the code had in the original single file. The split was checked with an AST tool so that no module's top-level code touches another module's not-yet-initialised `const`/`let`: there are no temporal-dead-zone hazards. When adding top-level code that *runs* at load time, using something imported from a module that `main.js` imports later is the one thing to watch. Calling imported `function` declarations is always safe.
+
+**How the split was made.** `tools/legacy/migration/split.mjs` parses the original script with Babel and assigns each top-level statement to a module by section. It computes every cross-module reference to generate `import`/`export` lines, and moves cross-module-assigned variables onto `ST`. It also checks evaluation order for TDZ hazards. It is kept as a reference; the modules are now the source of truth.
 
 ## 4. The field object `ST.G`
 
@@ -243,22 +247,18 @@ Each layout reserves `top/bot/side` margins. Pathos-4 reserves extra top space f
   - `lore` (fragments found), `maxField` (highest unlocked chapter)
 - A field in progress is not saved.
 
-## 9. Builds
+## 9. Serving and hosting
 
-| Command | Output | Use |
-|---|---|---|
-| `npm run dev` | Vite dev server, live reload | Development |
-| `npm run build` | `dist/triple-a-sweeper.html`: one 6 MB file | Sharing; works from `file://` |
-| `npm run build:artifact` | `dist/triple-a-sweeper.artifact.html` | Fragment format for a claude.ai Artifact (title first, no doctype/head) |
-| `npm run build:site` | `dist/site/`: hashed JS/CSS, fonts, `voices/` | Any static web host (relative paths) |
+There is **no build step**. The browser loads the source files directly: `index.html` links the stylesheets in cascade order and loads `js/main.js` as an ES module, which imports the rest.
 
-`tools/build/build-single.mjs`:
-1. Bundles `js/main.js` with esbuild into one IIFE.
-2. Concatenates the CSS files in `index.html` order.
-3. Replaces the self-hosted font CSS with the Google Fonts `<link>` (`tools/build/google-fonts.html`).
-4. Inlines every voice MP3 as base64 into `window.__VOICE_B64`. `voice-bank.js` uses it when present, otherwise it `fetch`es `voices/<id>.mp3`.
-
-**How the split was made.** `tools/legacy/migration/split.mjs` parses the original script with Babel and assigns each top-level statement to a module by section. It computes every cross-module reference to generate `import`/`export` lines, and moves cross-module-assigned variables onto `ST`. It also checks evaluation order for TDZ hazards. It is kept as a reference; the modules are now the source of truth.
+- **Development:** `scripts/startup.sh` runs `tools/serve.py`, a Python standard-library web server, in the background on http://localhost:8080.
+  - It serves only `index.html`, `css/`, `js/` and `assets/`, and answers 404 for anything else.
+  - It sends `Cache-Control: no-store`, so F5 always loads the current files.
+  - `scripts/shutdown.sh` stops it. The browser tools run their own instance on a free port.
+- **Why a server at all:** browsers load ES modules only over `http://`, so opening `index.html` from disk (`file://`) shows a blank page.
+- **Hosting:** copy `index.html`, `css/`, `js/` and `assets/` to any static web host. All paths are relative, so any folder or sub-path works.
+  - `js/debug.js` is included, but it is only loaded when the URL contains `?debug`.
+  - The voice MP3s are fetched by `audio/voice-bank.js` from `assets/voices/<id>.mp3` when first needed.
 
 ## 10. Recipes
 
@@ -268,7 +268,7 @@ Each layout reserves `top/bot/side` margins. Pathos-4 reserves extra top space f
 3. Tileset: add `plateX()`/`openX()` in `render/sprites.js` and wire them into the `ts===…` chains in `buildSprites()` (hidden, hover, open) and `craterSprite()`. Add a board-frame colour pair to `FR` and a corner-rivet colour in `render/draw-game.js`.
 4. Music: see [MUSIC.md](MUSIC.md#7-adding-a-theme).
 5. Chatter: add `CHAT.<bg>` in `data/dialogue.js` and generate the lines (see [VOICES.md](VOICES.md)).
-6. If it changes the HUD, check all three layouts with `npm run smoke` and `--mobile`.
+6. Run `biome lint`, then `scripts/smoke.sh` and `scripts/smoke.sh --mobile`, and look at the screenshots. If it changes the HUD, check all three layouts (TESTING.md lists viewports).
 
 **Add a sound effect:** add a method to `S` in `audio/sfx.js` using `osc()`/`nz()`, sending to `A.sfx` (and `A.sendS` for reverb).
 

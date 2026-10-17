@@ -85,9 +85,9 @@ nz(t, dur, vol, dest, opts)                     // filtered noise burst from A.n
 ## 4. Voice lines
 
 ### Files and loading
-- **Files:** `public/voices/<id>.mp3`, mono, 24 kHz, 32–40 kbps.
+- **Files:** `assets/voices/<id>.mp3`, mono, 24 kHz, 32–40 kbps.
 - **Metadata:** `js/data/voice-manifest.js`, with `d` (seconds), and `w` (speaker) and `t` (subtitle) for lines after the first batch.
-- **Loading:** `decodeOne(id)` fetches the MP3 (or takes the base64 copy inlined by the single-file build), decodes it with `decodeAudioData` and caches the `AudioBuffer` in `A.buffers`.
+- **Loading:** `decodeOne(id)` fetches the MP3, decodes it with `decodeAudioData` and caches the `AudioBuffer` in `A.buffers`.
 - **Cache:** an LRU of 52 decoded buffers. Decoded audio is float PCM at the context rate, roughly 1 MB per line. Ids in `PIN` (`data/dialogue.js`) are never evicted. These are event barks that must play instantly: hits, flags, low health, system lines, the Pathos-4 flood lines.
 - **Prefetch:** `startGame` decodes the chapter's announcer line, start line, opening chatter and win lines up front. After each chatter line starts, the next one is chosen and decoded in the background (`VM.queued`).
 
@@ -183,7 +183,7 @@ Headless Chromium plays audio into nothing, so tests check state instead:
 - `__t.VM()`: chatter state
 - `__t.say(id)`: play a line now
 
-For the music itself, render it offline to WAV (`npm run ost:render`) and inspect it:
+For the music itself, render it offline to WAV (`.venv/bin/python tools/ost/render_ost.py <theme>`, written to `out/ost/wav/`) and inspect it:
 - loudness: `ffmpeg -i x.wav -af ebur128 -f null -`
 - spectrogram picture: `ffmpeg -i x.wav -lavfi showspectrumpic=s=1200x400 spec.png`
 

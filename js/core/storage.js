@@ -1,5 +1,5 @@
 // core/storage.js — localStorage wrapper plus the persistent settings and player PROFILE objects.
-const store={get(k,d){try{const v=localStorage.getItem('aaasweep.'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('aaasweep.'+k,JSON.stringify(v));}catch(e){}}};
+const store={get(k,d){try{const v=localStorage.getItem('aaasweep.'+k);return v==null?d:JSON.parse(v);}catch{return d;}},set(k,v){try{localStorage.setItem('aaasweep.'+k,JSON.stringify(v));}catch{}}};
 const _st=store.get('settings',{});
 export const settings=Object.assign({master:.9,music:.5,voice:1,sfx:.8,subs:true,chatter:'normal',grain:true,sway:true,muted:false,blood:true},_st);
 if(_st.sv!==2){if(_st.chatter==='constant')settings.chatter='normal';settings.sv=2;}

@@ -59,7 +59,7 @@ function finishVoice(v){
   if(ST.G&&cur==='game')onLineEnd(v.id);
   if(!VM.active.length&&VM.wait.length){const n=now();VM.wait=VM.wait.filter(x=>n-x.t<6);const nx=VM.wait.shift();if(nx)setTimeout(()=>{if(!VM.active.length)say(nx.id,nx.o);else VM.wait.unshift(nx);},450);}
 }
-function stopVoice(v){try{v.src.onended=null;v.src.stop();}catch(e){}finishVoice(v);}
+function stopVoice(v){try{v.src.onended=null;v.src.stop();}catch{}finishVoice(v);}
 export function stopAllVoices(){VM.wait=[];[...VM.active].forEach(stopVoice);VM.wait=[];}
 export function bark(id,cd,sec,o={}){if(!ST.G)return say(id,o);if(cd&&(VM.cds[cd]??-1e9)>ST.G.clock)return false;const ok=say(id,o);if(ok&&cd)VM.cds[cd]=ST.G.clock+sec;return ok;}
 function onLineEnd(id){if(ST.G.over)return;const q=QUEST_ON_LINE[id];if(q)addSide(q);if(id==='d_5'&&ST.G.theme.bg!=='club')startClub();if(whoOf(id)==='qm'&&Math.random()<.5){setTimeout(()=>notify('LIMITED TIME OFFER','Premium flag skins are in the store. Press B.','info','%'),600);sched(1.3,()=>bark('s_store','sstore',60));}}

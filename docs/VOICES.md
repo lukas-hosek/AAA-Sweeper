@@ -4,30 +4,30 @@ All 197 voice lines were generated offline with **Kokoro** (Kokoro-82M, an open-
 
 ```
 tools/tts/lines.py            every line: id, speaker, text for TTS, subtitle (source of truth)
-tools/tts/generate_voices.py  synthesises lines -> public/voices/<id>.mp3 and updates the manifest
-tools/tts/download_models.sh  fetches the model files into tools/tts/models/ (about 120 MB, gitignored)
-tools/tts/requirements.txt    Python packages
+tools/tts/generate_voices.py  synthesises lines -> assets/voices/<id>.mp3 and updates the manifest
+tools/tts/download_models.sh  fetches the model files into tools/tts/models/ (about 120 MB, not committed)
+scripts/bake_voices.sh        runs generate_voices.py with the venv's Python (fetches the model if missing)
+requirements.txt              pinned Python packages (kokoro-onnx, onnxruntime, ...), installed by scripts/setup.sh
 js/data/voice-manifest.js     GENERATED: id -> {d: seconds, w: speaker, t: subtitle}
-public/voices/*.mp3           the audio, mono 24 kHz, 32–40 kbps (about 4.6 MB total)
+assets/voices/*.mp3           the audio, mono 24 kHz, 32–40 kbps (about 4.6 MB total, committed)
 ```
 
 ## Setup (once)
 
+`scripts/setup.sh` creates `.venv`, installs the packages and downloads the model files (checking their SHA-256). It also needs ffmpeg (see SETUP.md). Then:
+
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r tools/tts/requirements.txt
-bash tools/tts/download_models.sh     # verifies SHA-256 of both files
-python3 tools/tts/generate_voices.py --check
+scripts/bake_voices.sh --check       # -> OK (197 lines)
 ```
 
 ## Commands
 
 ```bash
-python3 tools/tts/generate_voices.py                 # generate lines that have no MP3 yet
-python3 tools/tts/generate_voices.py pa_25 hc_4      # (re)generate specific ids
-python3 tools/tts/generate_voices.py --force         # regenerate all 197 (several minutes)
-python3 tools/tts/generate_voices.py --check         # consistency check, no TTS
-python3 tools/tts/generate_voices.py --say prof "Testing, one two."   # preview -> out/tts/preview.mp3
+scripts/bake_voices.sh                    # generate lines that have no MP3 yet
+scripts/bake_voices.sh pa_25 hc_4         # (re)generate specific ids
+scripts/bake_voices.sh --force            # regenerate all 197 (several minutes)
+scripts/bake_voices.sh --check            # consistency check, no TTS
+scripts/bake_voices.sh --say prof "Testing, one two."   # preview -> out/tts/preview.mp3
 ```
 
 **Generation is deterministic** for the same model files and package versions. Regenerating an existing line produced a byte-identical MP3 when this workspace was set up. A different `kokoro-onnx` or model version will sound slightly different.
@@ -85,16 +85,12 @@ Event barks have descriptive names: `r_hit3`, `j_low`, `s_ach`, `a_ch5p`.
 ## Adding a line
 
 1. **Write it.** Add the tuple to the newest batch in `tools/tts/lines.py` (or start a `BATCH5` and register it in `BATCHES`, with `bitrate: '32k', manifest_text: True`).
-2. **Generate it:** `python3 tools/tts/generate_voices.py <id>`. This writes the MP3 and the manifest entry.
+2. **Generate it:** `scripts/bake_voices.sh <id>`. This writes the MP3 and the manifest entry.
 3. **Wire it into the game:**
    - **Chapter chatter:** append the id to the character's arc in `CHAT.<theme>.arcs` (`js/data/dialogue.js`). Add it to `open` to have it play first.
    - **Any chapter:** add it to `SHARED` (played after the arcs) or `REPEATS`.
    - **Event bark:** call `bark('<id>', '<cooldownKey>', seconds)` where the event happens. If it must play instantly, add the id to `PIN` so it stays decoded.
    - **Quest on a line:** map the id to a side-quest key in `QUEST_ON_LINE`.
-4. **Check:** `python3 tools/tts/generate_voices.py --check`, then `npm run smoke`. Run `npm run build` if you ship the single file.
+4. **Check:** `scripts/bake_voices.sh --check`, `biome lint`, then `scripts/smoke.sh`. Commit the new MP3 together with `lines.py`, the manifest and the code that uses it.
 
 **Removing a line:** delete it from `lines.py`, its MP3 and its manifest row (or regenerate the manifest), and remove every reference in `js/`.
-
-## History
-
-The original generation scripts (`gen.py`, `gen2.py`, `gen3.py`, `gen4.py`) are in `tools/legacy/tts/`. They wrote JSON with base64 MP3s that were embedded into the single HTML file. `lines.py` contains their line lists verbatim.

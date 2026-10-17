@@ -1,18 +1,19 @@
 # Testing and debugging
 
-The game has no unit tests. It is verified the way it was built: by **driving it in headless Chromium and looking at it**. The tools work the same for a person and for Claude Code.
+The game has no unit tests. It is verified the way it was built: by **driving it in headless Chromium and looking at it**, plus a static **lint** of the JavaScript and CSS. The tools work the same for a person and for Claude Code. They run with the project's Python virtual environment (`.venv`, created by `scripts/setup.sh`); the scripts in `scripts/` call `.venv/bin/python` for you.
 
 ## Smoke test
 
 ```bash
-npm run smoke                 # desktop 1440×900, Vite dev server (source files)
-npm run smoke -- --mobile     # 390×844 touch phone, DPR 2
-npm run smoke -- --full       # also click the desktop icon and sit through launcher + intro (~25 s more)
-npm run build && npm run smoke:single   # test the single-file build over file://
-npm run build:site && npm run smoke:site   # test the multi-file site build
+scripts/smoke.sh              # desktop 1440×900
+scripts/smoke.sh --mobile     # 390×844 touch phone, DPR 2
+scripts/smoke.sh --full       # also click the desktop icon and sit through launcher + intro (~25 s more)
+scripts/smoke.sh --url http://localhost:8080/   # test the running dev server instead
 ```
 
-`tools/browser/smoke.mjs` runs these steps:
+It takes about 1.5 minutes. It starts its own private copy of the dev server on a free port, so it doesn't need, and doesn't disturb, the server on :8080.
+
+`tools/browser/smoke.py` runs these steps:
 1. Boots to the desktop.
 2. Opens the title screen and checks that the title music is playing.
 3. **For each of the 6 chapters:**
@@ -24,23 +25,35 @@ npm run build:site && npm run smoke:site   # test the multi-file site build
    - chapter 5: Pathos-4 floods when the timer runs out, and the breath readout renders
 5. **Credits:** rolls them and checks that 1,412 positions are laid out and the credits music plays.
 
-The test fails on any uncaught exception, `console.error`, or HTTP ≥ 400 response. Missing Google Fonts are tolerated offline, and so is a missing favicon. Screenshots are written to `out/smoke/<viewport>/`.
+The test fails on any uncaught exception, `console.error`, or HTTP ≥ 400 response. The server answers 404 for anything outside `index.html`, `css/`, `js/` and `assets/`, so a reference to a file that wouldn't be deployed fails here too. Screenshots are written to `out/smoke/<viewport>/`.
 
 **Run it after every change.** Then open a few screenshots and look at them. Layout bugs (overlapping HUD panels, text running off screen) don't throw errors.
+
+## Lint (Biome)
+
+```bash
+biome lint            # js/ and css/, configured in biome.json
+```
+
+Biome checks **correctness only**; it reports and never changes files. The configuration keeps the correctness and suspicious rule groups and switches off the style and complexity groups, which would fight the intentionally compact code. The rules that matter most:
+- **`noUndeclaredVariables`:** a missing `import` or a typo in a name. In ES modules this otherwise shows up only at runtime, when that code path runs.
+- **`noUnusedVariables`, `noUnusedImports`:** leftovers after a change.
+
+The code is clean (no diagnostics), so any finding is new. Fix findings by hand in the surrounding style. Don't use `biome format`, `biome check --write` or `biome lint --write`: the formatter is disabled in `biome.json`, and automatic fixes would rewrite code in Biome's style.
 
 ## Screenshots of a specific state
 
 ```bash
-node tools/browser/screenshot.mjs --screen desktop
-node tools/browser/screenshot.mjs --screen title --mobile
-node tools/browser/screenshot.mjs --chapter 3 --clicks 8
-node tools/browser/screenshot.mjs --chapter 1 --boom                 # blood overlay
-node tools/browser/screenshot.mjs --chapter 5 --flood --breath -11.5 # Pathos-4 underwater, tiny breath value
-node tools/browser/screenshot.mjs --chapter 2 --diff veteran --size 1280x720 --out out/v.png
-node tools/browser/screenshot.mjs --screen credits --wait 20000
+.venv/bin/python tools/browser/screenshot.py --screen desktop
+.venv/bin/python tools/browser/screenshot.py --screen title --mobile
+.venv/bin/python tools/browser/screenshot.py --chapter 3 --clicks 8
+.venv/bin/python tools/browser/screenshot.py --chapter 1 --boom                 # blood overlay
+.venv/bin/python tools/browser/screenshot.py --chapter 5 --flood --breath -11.5 # Pathos-4 underwater, tiny breath value
+.venv/bin/python tools/browser/screenshot.py --chapter 2 --diff veteran --size 1280x720 --out out/v.png
+.venv/bin/python tools/browser/screenshot.py --screen credits --wait 20000
 ```
 
-Output goes to `out/shots/` by default. Use `--target single` to shoot the built file.
+Output goes to `out/shots/` by default. Add `--url http://localhost:8080/` to shoot the running dev server.
 
 **Viewports worth checking:**
 
@@ -54,7 +67,7 @@ Output goes to `out/shots/` by default. Use `--target single` to shoot the built
 
 ## Debug hooks (`?debug`)
 
-Open the game with `?debug` in the URL (e.g. `http://localhost:5173/?debug`) and `js/debug.js` installs:
+Open the game with `?debug` in the URL (e.g. `http://localhost:8080/?debug`) and `js/debug.js` installs:
 
 | Hook | What it does |
 |---|---|
@@ -79,33 +92,35 @@ Open the game with `?debug` in the URL (e.g. `http://localhost:5173/?debug`) and
 
 From the browser devtools console you can play with these directly, e.g. `__t.start('veteran', 5); setTimeout(() => __t.floodIn(3), 3000)`.
 
-From a script, `tools/lib/env.mjs` provides helpers:
+From a script, `tools/lib/env.py` provides helpers for Python Playwright (sync API):
 
 | Helper | Purpose |
 |---|---|
-| `startTarget('dev' \| 'single' \| 'site')` | Start or locate the game |
-| `launch()` | Headless Chromium with autoplay allowed |
-| `newPage(browser, {mobile})` | New page; collects errors |
-| `openGame(page, url)` | Load with `?debug` and wait for the hooks |
+| `serve_game(url=None)` | Context manager yielding the game URL: a private server on a free port, or `url` if given |
+| `launch(p)` | Headless Chromium with autoplay allowed |
+| `new_page(browser, width, height, mobile)` | New page; collects errors in `page.errors` |
+| `open_game(page, url)` | Load with `?debug` and wait for the hooks |
 | `t(page, expr)` | Evaluate a hook expression |
+| `args()` | The tools' tiny command-line parser (`--key value`, `--flag`) |
 
-Use them for one-off investigations: copy `screenshot.mjs` and adapt it.
+Use them for one-off investigations: copy `tools/browser/screenshot.py` and adapt it. Run it with `.venv/bin/python`.
 
 ## Debugging tips
 
 - **Errors inside the game loop** are caught and logged with `console.error` (see `tick` in `main.js`), so the game keeps running. Watch the console, or the smoke test's "page errors".
-- **The dev server serves the modules unbundled,** so stack traces point at the real file and line.
-- **`file://` does not work for the dev version** (ES modules need http). Use `npm run dev`, or build the single file.
+- **The modules are served as they are, unbundled,** so stack traces point at the real file and line.
+- **`file://` does not work** (ES modules need http). Use `scripts/startup.sh` and http://localhost:8080.
+- **Debugging in VS Code:** the launch configuration *Play in Chromium (debugger)* opens the game with breakpoints working in `js/` (see SETUP.md §5).
 - **No sound before a click:** this is the browser's autoplay policy, not a bug. In headless tests the launch flag `--autoplay-policy=no-user-gesture-required` plus `__t.audio()` handles it.
 - **Timing-dependent features** (chatter, supply drops, tips) run on `ST.G.clock`, the game time, which stops while paused. To test them faster, set fields on `__t.G()` (e.g. `__t.G().nextCrate = 0`) instead of waiting.
 - **Mine placement is random** (after the first click). To find a mine, look at `__t.G().mine`. To find a safe tile, read `__t.G().target` (the quest marker).
 - **Audio verification** without hearing:
   - **State:** `__t.mus()`, `__t.voicesLoaded()`.
-  - **Rendered music:** `node tools/ost/render-ost.mjs <theme>`, then `ffmpeg -i out/ost/wav/<theme>.wav -af ebur128 -f null -` for loudness, and `ffmpeg -i ... -lavfi showspectrumpic=s=1200x400:legend=0 spec.png` for a spectrogram picture.
-- **Comparing with the original:** `reference/triple-a-sweeper-v11.html` is the last single-file version before the split, and opens directly in a browser. Use it to check that a regression is new.
+  - **Rendered music:** `.venv/bin/python tools/ost/render_ost.py <theme>`, then `ffmpeg -i out/ost/wav/<theme>.wav -af ebur128 -f null -` for loudness, and `ffmpeg -i ... -lavfi showspectrumpic=s=1200x400:legend=0 spec.png` for a spectrogram picture.
+- **Comparing with the original:** `reference/triple-a-sweeper-v11.html` is the last single-file version before the split into modules (voices embedded), and opens directly in a browser. Use it to check that a regression is new.
 
 ## Environment notes
 
-- Playwright uses its own Chromium (`npx playwright install chromium`). To use another browser binary, set `CHROME_PATH=/path/to/chrome`.
+- **Playwright** is pinned in `requirements.txt` (1.63.0) and uses its own Chromium build in `~/.cache/ms-playwright/` (`.venv/bin/playwright install chromium`, done by `scripts/setup.sh`). To use another browser binary, set `CHROME_PATH=/path/to/chrome`.
 - Running as root (containers) adds `--no-sandbox` automatically.
-- Offline, Google Fonts can't load in the single-file build, so text falls back to system fonts. The dev build self-hosts the fonts, so it always renders correctly.
+- The fonts are self-hosted in `assets/fonts/`, so screenshots render identically offline.

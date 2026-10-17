@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Turn the rendered WAVs (out/ost/wav, from render-ost.mjs) into a tagged soundtrack release.
+"""Turn the rendered WAVs (out/ost/wav, from tools/ost/render_ost.py) into a tagged soundtrack release.
 
 - measures integrated loudness (EBU R128) with ffmpeg and turns each track down to -16 LUFS
   (tracks quieter than that are left alone rather than boosted, so nothing clips; no limiter)
 - encodes MP3 320 kbps CBR (ID3v2.3) and FLAC 24-bit / 48 kHz, both with tags and the cover embedded
 - writes out/ost/Triple A Sweeper OST (MP3 320).zip and ... (FLAC 24-bit).zip
 
-Needs ffmpeg on PATH. Cover: out/ost/cover.jpg (node tools/ost/make-cover.mjs) if present.
+Needs ffmpeg on PATH. Cover: out/ost/cover.jpg (tools/ost/make_cover.py) if present.
 """
 import os, re, shutil, subprocess, sys, zipfile
 
@@ -39,7 +39,7 @@ def main():
         sys.exit('ffmpeg not found on PATH')
     tracks = [(n, m, t) for n, (m, t) in enumerate(TRACKS, 1) if os.path.exists(os.path.join(WAV, m + '.wav'))]
     if not tracks:
-        sys.exit('no WAVs in out/ost/wav — run node tools/ost/render-ost.mjs first')
+        sys.exit('no WAVs in out/ost/wav — run scripts/export_ost.sh (or tools/ost/render_ost.py) first')
     cover = os.path.join(OST, 'cover.jpg')
     has_cover = os.path.exists(cover)
     mp3_dir = os.path.join(OST, 'Triple A Sweeper OST (MP3 320)')

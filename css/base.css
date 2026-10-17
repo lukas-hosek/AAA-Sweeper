@@ -1,0 +1,18 @@
+/* Layout: four full-viewport stages stacked as fixed screens (desktop → intro → title → game).
+   The game is one canvas (scene + board + effects) under a DOM HUD that lets clicks fall through. */
+:root{
+  --w98-teal:#008080; --w98-face:#c0c0c0; --w98-hi:#ffffff; --w98-lite:#dfdfdf; --w98-shadow:#808080; --w98-navy:#000080; --w98-blue:#1084d0;
+  --ink:#e9eef2; --ink-dim:#9aabb6; --gold:#f2c14e; --gold-hi:#ffd77a; --red:#ff3d3d; --panel:rgba(7,13,19,.74); --panel-lo:rgba(7,13,19,.38); --line:rgba(233,238,242,.14);
+  --f-ui:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --f-num:"Teko","Bahnschrift","Arial Narrow",sans-serif;
+  --f-epic:"Cinzel","Trajan Pro",Georgia,serif;
+  --f-w98:Tahoma,"MS Sans Serif",Geneva,Verdana,sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%;overflow:hidden;background:#000}
+body{margin:0;color:var(--ink);font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.screen{position:fixed;inset:0;overflow:hidden}
+button{font:inherit;color:inherit}
+kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid rgba(233,238,242,.55);border-radius:3px;background:rgba(233,238,242,.08);font:600 .92em/1.5 var(--f-ui);text-align:center;color:var(--ink)}
+:focus-visible{outline:2px solid var(--gold-hi);outline-offset:2px}

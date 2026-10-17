@@ -1,0 +1,7 @@
+node_modules/
+dist/
+out/
+.venv/
+tools/tts/models/
+*.wav
+.DS_Store

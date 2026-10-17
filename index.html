@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Triple A Sweeper</title>
+<link rel="icon" href="favicon.svg">
+<!-- @fonts:start (replaced by Google Fonts links in the single-file build) -->
+<link rel="stylesheet" href="css/fonts.css">
+<!-- @fonts:end -->
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/desktop.css">
+<link rel="stylesheet" href="css/intro.css">
+<link rel="stylesheet" href="css/title.css">
+<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/overlays.css">
+<link rel="stylesheet" href="css/credits.css">
+<link rel="stylesheet" href="css/layouts.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-mine" viewBox="0 0 32 32" shape-rendering="crispEdges">
+      <rect x="15" y="3" width="2" height="26" fill="#000"/><rect x="3" y="15" width="26" height="2" fill="#000"/>
+      <rect x="7" y="7" width="3" height="3" fill="#000"/><rect x="22" y="7" width="3" height="3" fill="#000"/><rect x="7" y="22" width="3" height="3" fill="#000"/><rect x="22" y="22" width="3" height="3" fill="#000"/>
+      <rect x="11" y="8" width="10" height="16" fill="#000"/><rect x="8" y="11" width="16" height="10" fill="#000"/><rect x="9" y="9" width="14" height="14" fill="#000"/>
+      <rect x="12" y="11" width="3" height="3" fill="#fff"/>
+    </symbol>
+    <symbol id="i-arrow" viewBox="0 0 10 10" shape-rendering="crispEdges">
+      <rect x="0" y="0" width="10" height="10" fill="#000"/><rect x="1" y="1" width="8" height="8" fill="#fff"/>
+      <rect x="4" y="2" width="4" height="1" fill="#000"/><rect x="6" y="3" width="2" height="2" fill="#000"/><rect x="5" y="4" width="1" height="1" fill="#000"/><rect x="4" y="5" width="1" height="1" fill="#000"/><rect x="3" y="6" width="1" height="2" fill="#000"/><rect x="2" y="7" width="1" height="1" fill="#000"/>
+    </symbol>
+    <symbol id="i-pc" viewBox="0 0 32 32" shape-rendering="crispEdges">
+      <rect x="5" y="3" width="22" height="18" fill="#c3c0b4"/><rect x="5" y="3" width="22" height="1" fill="#fff"/><rect x="5" y="3" width="1" height="18" fill="#fff"/><rect x="26" y="3" width="1" height="18" fill="#58564e"/><rect x="5" y="20" width="22" height="1" fill="#58564e"/>
+      <rect x="8" y="6" width="16" height="11" fill="#000"/><rect x="9" y="7" width="14" height="9" fill="#008080"/><rect x="10" y="8" width="5" height="2" fill="#54d0d0"/>
+      <rect x="12" y="21" width="8" height="2" fill="#8d8a7f"/><rect x="6" y="23" width="20" height="5" fill="#c3c0b4"/><rect x="6" y="23" width="20" height="1" fill="#fff"/><rect x="6" y="27" width="20" height="1" fill="#58564e"/><rect x="20" y="25" width="4" height="1" fill="#2e7d32"/>
+    </symbol>
+    <symbol id="i-folder" viewBox="0 0 32 32" shape-rendering="crispEdges">
+      <rect x="3" y="8" width="11" height="3" fill="#c9a200"/><rect x="3" y="10" width="26" height="17" fill="#e0b400"/><rect x="8" y="6" width="15" height="9" fill="#fff"/><rect x="10" y="8" width="10" height="1" fill="#7a7a7a"/><rect x="10" y="10" width="8" height="1" fill="#7a7a7a"/>
+      <rect x="3" y="13" width="26" height="14" fill="#ffd83b"/><rect x="3" y="13" width="26" height="1" fill="#fff2a0"/><rect x="28" y="13" width="1" height="14" fill="#a07800"/><rect x="3" y="26" width="26" height="1" fill="#a07800"/>
+    </symbol>
+    <symbol id="i-bin" viewBox="0 0 32 32" shape-rendering="crispEdges">
+      <rect x="7" y="6" width="18" height="3" fill="#9a9a9a"/><rect x="7" y="6" width="18" height="1" fill="#e6e6e6"/><rect x="8" y="9" width="16" height="19" fill="#c8c8c8"/>
+      <rect x="10" y="10" width="1" height="17" fill="#7c7c7c"/><rect x="13" y="10" width="1" height="17" fill="#7c7c7c"/><rect x="16" y="10" width="1" height="17" fill="#7c7c7c"/><rect x="19" y="10" width="1" height="17" fill="#7c7c7c"/><rect x="22" y="10" width="1" height="17" fill="#7c7c7c"/><rect x="8" y="27" width="16" height="1" fill="#5a5a5a"/>
+      <rect x="12" y="13" width="8" height="8" fill="#fff"/><rect x="13" y="15" width="6" height="1" fill="#2a7"/><rect x="13" y="17" width="5" height="1" fill="#2a7"/>
+    </symbol>
+    <symbol id="i-note" viewBox="0 0 32 32" shape-rendering="crispEdges">
+      <rect x="7" y="3" width="18" height="26" fill="#fff"/><rect x="7" y="3" width="18" height="3" fill="#1f4fbf"/><rect x="24" y="3" width="1" height="26" fill="#7c7c7c"/><rect x="7" y="28" width="18" height="1" fill="#7c7c7c"/>
+      <rect x="9" y="9" width="13" height="1" fill="#555"/><rect x="9" y="12" width="11" height="1" fill="#555"/><rect x="9" y="15" width="13" height="1" fill="#555"/><rect x="9" y="18" width="9" height="1" fill="#555"/><rect x="9" y="21" width="12" height="1" fill="#555"/>
+    </symbol>
+    <symbol id="i-win" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="1" y="2" width="14" height="12" fill="#000"/><rect x="2" y="3" width="12" height="2" fill="#000080"/><rect x="2" y="5" width="12" height="8" fill="#fff"/><rect x="3" y="7" width="5" height="1" fill="#808080"/><rect x="3" y="9" width="7" height="1" fill="#808080"/>
+    </symbol>
+    <symbol id="i-speaker" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="2" y="6" width="3" height="4" fill="#000"/><rect x="5" y="5" width="1" height="6" fill="#000"/><rect x="6" y="4" width="1" height="8" fill="#000"/><rect x="7" y="3" width="1" height="10" fill="#000"/><rect x="10" y="6" width="1" height="4" fill="#000"/><rect x="12" y="4" width="1" height="8" fill="#000"/>
+    </symbol>
+    <symbol id="i-info" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#fff" stroke="#000"/><circle cx="16" cy="16" r="11" fill="#1c3fd1"/><rect x="14.5" y="13" width="3" height="11" fill="#fff"/><rect x="14.5" y="8" width="3" height="3" fill="#fff"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 32 32"><path d="M16 3 L30 28 H2 Z" fill="#ffd400" stroke="#000"/><rect x="14.5" y="11" width="3" height="10" fill="#000"/><rect x="14.5" y="23" width="3" height="3" fill="#000"/></symbol>
+  </defs>
+</svg>
+
+<section id="desktop" class="screen" aria-label="Desktop">
+  <div class="icons">
+    <button class="dicon" data-open="pc"><span class="ico"><svg><use href="#i-pc"/></svg></span><span class="lbl">My Computer</span></button>
+    <button class="dicon" data-open="docs"><span class="ico"><svg><use href="#i-folder"/></svg></span><span class="lbl">My Documents</span></button>
+    <button class="dicon" data-open="bin"><span class="ico"><svg><use href="#i-bin"/></svg></span><span class="lbl">Recycle Bin</span></button>
+    <button class="dicon" data-open="notes"><span class="ico"><svg><use href="#i-note"/></svg></span><span class="lbl">PATCH_NOTES.TXT</span></button>
+  </div>
+  <button class="dicon" id="aaa-icon" aria-label="Launch Triple A Sweeper"><span class="ico"><svg><use href="#i-mine"/></svg><svg class="arrow"><use href="#i-arrow"/></svg></span><span class="lbl">Triple A Sweeper</span></button>
+  <div class="taskbar">
+    <button class="btn98 start" id="startbtn"><svg><use href="#i-win"/></svg>Start</button>
+    <div id="tb-tasks" style="display:flex;gap:3px;min-width:0"></div>
+    <div class="tray"><svg><use href="#i-speaker"/></svg><span id="clock">12:00</span></div>
+  </div>
+</section>
+
+<section id="intro" class="screen" hidden>
+  <div class="card" data-sting="engine" data-hold="2300">
+    <svg class="ue" viewBox="0 0 120 120" aria-hidden="true">
+      <polygon points="60,6 107,33 107,87 60,114 13,87 13,33" fill="none" stroke="#e8edf1" stroke-width="3"/>
+      <path d="M36 32 V64 A24 24 0 0 0 84 64 V32" fill="none" stroke="#e8edf1" stroke-width="9"/>
+      <path class="u2" d="M48 32 V62 A12 12 0 0 0 72 62 V32" fill="none" stroke="#8fd3ff" stroke-width="4"/>
+      <path class="u1" d="M56 32 V60 A4 4 0 0 0 64 60 V32" fill="none" stroke="#ff7ad9" stroke-width="2"/>
+    </svg>
+    <div class="ue-word">UNREALITY</div>
+    <div class="ue-sub">ENGINE <b>5.9</b></div>
+    <p class="legal">Unreality® Engine. Reality sold separately. Performance may vary between 4 and 240 frames per second.</p>
+  </div>
+  <div class="card" data-sting="physics" data-hold="2700">
+    <div class="mh" aria-label="Mayhem"><span style="--d:0s;--r0:-50deg;--r1:-4deg">M</span><span style="--d:.12s;--r0:40deg;--r1:3deg">A</span><span style="--d:.24s;--r0:-30deg;--r1:-2deg">Y</span><span style="--d:.36s;--r0:60deg;--r1:5deg">H</span><span style="--d:.48s;--r0:-40deg;--r1:-3deg">E</span><span class="tip" style="--d:.6s;--r0:30deg;--r1:2deg">M</span></div>
+    <div class="mh-sub">PHYSICS ENGINE</div>
+    <p class="legal">Mayhem Physics. Now with 40% more ragdoll. Objects may tip over without warning.</p>
+  </div>
+  <div class="card" data-sting="blink" data-hold="2400">
+    <svg class="eye" viewBox="0 0 160 80" aria-hidden="true">
+      <defs>
+        <clipPath id="eyeclip"><path d="M8 40 Q80 -14 152 40 Q80 94 8 40Z"/></clipPath>
+        <radialGradient id="irisg"><stop offset="0" stop-color="#0b1a24"/><stop offset=".38" stop-color="#25a3c4"/><stop offset="1" stop-color="#0b3a4d"/></radialGradient>
+      </defs>
+      <path d="M8 40 Q80 -14 152 40 Q80 94 8 40Z" fill="#eef2f4"/>
+      <g clip-path="url(#eyeclip)">
+        <g class="iris"><circle cx="80" cy="40" r="24" fill="url(#irisg)"/><circle cx="80" cy="40" r="9" fill="#05080b"/><circle cx="73" cy="33" r="4" fill="#fff"/></g>
+        <rect class="lid" x="0" y="-12" width="160" height="104" fill="#000"/>
+      </g>
+      <path d="M8 40 Q80 -14 152 40 Q80 94 8 40Z" fill="none" stroke="#e8edf1" stroke-width="3"/>
+    </svg>
+    <div class="bk-word">BLINK<span>VIDEO</span></div>
+    <p class="legal">Blink Video. If you saw this logo, you did not blink. Congratulations.</p>
+  </div>
+  <div class="card" data-sting="ice" data-hold="2400">
+    <svg class="flake" viewBox="-50 -50 100 100" aria-hidden="true">
+      <defs><g id="arm" stroke="#cfefff" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M0 0 V-44"/><path d="M0 -18 L-10 -28 M0 -18 L10 -28"/><path d="M0 -32 L-7 -39 M0 -32 L7 -39"/></g></defs>
+      <use href="#arm"/><use href="#arm" transform="rotate(60)"/><use href="#arm" transform="rotate(120)"/><use href="#arm" transform="rotate(180)"/><use href="#arm" transform="rotate(240)"/><use href="#arm" transform="rotate(300)"/>
+    </svg>
+    <div class="ww-word">WWice</div>
+    <div class="ww-sub">INTERACTIVE AUDIO · FROZEN SOLID</div>
+    <p class="legal">WWice™ audio middleware. Every footstep, explosion and radio call, served at −18 °C.</p>
+  </div>
+  <div class="card" data-sting="megalith" data-hold="2700">
+    <svg class="monolith" viewBox="0 0 60 120" aria-hidden="true"><polygon points="12,8 48,4 52,116 8,116" fill="#0d0f12" stroke="#c9a35a" stroke-width="1.2"/><polygon points="12,8 48,4 46,11 14,14" fill="#c9a35a" opacity=".35"/></svg>
+    <div class="mg-word">MEGALITH INTERACTIVE</div>
+    <div class="mg-sub">presents</div>
+    <p class="legal">A game made by 1,412 people across 14 studios and 9 time zones. Opinions expressed by Big Dez do not reflect those of Megalith Interactive.</p>
+  </div>
+  <div id="skip"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="sk-bg"/><circle cx="18" cy="18" r="15" class="sk-fg" id="sk-fg"/></svg><span>HOLD <kbd>SPACE</kbd> OR PRESS AND HOLD TO SKIP</span></div>
+</section>
+
+<section id="title" class="screen" hidden>
+  <canvas id="tcv"></canvas>
+  <div class="ti">
+    <div class="ti-pre">MEGALITH INTERACTIVE</div>
+    <h1 class="ti-logo"><span class="ti-a">TRIPLE A</span><span class="ti-b">SWEEPER</span></h1>
+    <div class="ti-sub">Remastered · Definitive · Game of the Year Edition</div>
+    <div id="press">PRESS ANY KEY</div>
+    <nav id="mainmenu" class="menu" hidden>
+      <button data-m="new">NEW GAME<small>Season 7: Mineborne is live</small></button>
+      <button data-m="continue" class="locked">CONTINUE<small>No save found · Cloud Saves+ required</small></button>
+      <button data-m="store">STORE <small class="hot">NEW FLAG SKINS</small></button>
+      <button data-m="credits">CREDITS<small>1,412 people. Sort of.</small></button>
+      <button data-m="settings">SETTINGS</button>
+      <button data-m="quit">QUIT TO DESKTOP</button>
+    </nav>
+    <nav id="diffmenu" class="menu" hidden>
+      <div class="menu-h">SELECT DIFFICULTY</div>
+      <button data-d="story">STORY<small>9 × 9 · 10 mines · For players who want to experience the narrative</small></button>
+      <button data-d="normal">NORMAL<small>16 × 16 · 40 mines · Recommended</small></button>
+      <button data-d="veteran">VETERAN<small>30 × 16 · 99 mines · Best on a big screen with a mouse</small></button>
+      <button data-d="realism" class="locked">REALISM<small>One mine, no health regeneration · Season Pass required</small></button>
+      <button data-d="back">BACK</button>
+    </nav>
+    <nav id="chapmenu" class="menu" hidden></nav>
+    <div id="ld" hidden><div class="ld-tip"><b>TIP</b><span id="ld-tip"></span></div><div class="ld-bar"><i id="ld-bar"></i></div><div class="ld-st" id="ld-st">Loading</div></div>
+  </div>
+  <div class="ticker"><div class="tk-in">SEASON 7: MINEBORNE IS LIVE &nbsp;✦&nbsp; DOUBLE XP WEEKEND (THIS IS NOT A WEEKEND) &nbsp;✦&nbsp; NEW IN STORE: CHROME FLAG &nbsp;✦&nbsp; PATCH 1.0.7 FIXES A BUG WHERE PLAYERS COULD LOSE &nbsp;✦&nbsp; COMMUNITY GOAL: 1,000,000 TILES CLEARED (3% COMPLETE) &nbsp;✦&nbsp; CHAPTER THREE: DA CLUB · BIG DEZ SAYS COME THROUGH &nbsp;✦&nbsp; NEW: MOM'S BACKYARD (FREE, LIKE MOM'S LOVE) &nbsp;✦&nbsp; DR. KOVA IS SORRY &nbsp;✦&nbsp;</div></div>
+  <div class="ti-build">v1.0.7-dayone · build 48213 · Online services connected · 0 friends online</div>
+</section>
+
+<section id="game" class="screen" hidden>
+  <canvas id="cv" aria-label="Minesweeper board"></canvas>
+  <div id="fx-vig"></div><div id="fx-water"></div><canvas id="blood"></canvas><div id="fx-dmg"></div><div id="fx-grain"></div>
+  <div id="hud">
+    <div id="o2"></div>
+    <div id="compass"><canvas id="compassCv"></canvas></div>
+    <div id="quests" class="hudp">
+      <div class="q-kick">MAIN QUEST</div>
+      <div class="q-title" id="q-title">Operation: Clean Sweep</div>
+      <ul id="q-obj"></ul>
+      <div id="q-side" hidden></div>
+      <div class="q-hint">[J] QUEST LOG &nbsp; [K] SKILLS &nbsp; [B] STORE</div>
+    </div>
+    <div id="tr">
+      <div class="mm"><canvas id="mm"></canvas><span class="mm-lab" id="mm-lab">SECTOR B-4</span></div>
+      <div class="tr-row"><span class="coin"></span><b id="coins">0</b> SWEEP COINS</div>
+      <div class="season">SEASON 7 · MINEBORNE · TIER <b id="tier">1</b><div class="sbar"><i id="sbar"></i></div></div>
+      <div class="tr-btns"><button id="b-mute" class="hbtn">SOUND ON</button><button id="b-menu" class="hbtn">MENU</button></div>
+    </div>
+    <div id="feed"></div>
+    <div id="radio" class="hudp" hidden>
+      <div class="pt"><canvas id="portrait" width="152" height="152"></canvas></div>
+      <div class="rd-main"><div class="rd-kick"><i></i> INCOMING TRANSMISSION</div><div class="rd-name" id="rd-name"></div><div class="rd-tag" id="rd-tag"></div><canvas id="wave" width="400" height="40"></canvas></div>
+    </div>
+    <div id="subs" aria-live="polite"></div>
+    <div id="player" class="hudp">
+      <div class="pl-top"><span class="lvl" id="lvl">1</span><div class="pl-name">SWEEPER<small id="rank">RECRUIT</small></div><button id="skillnag" class="nag" hidden>SKILL POINT</button></div>
+      <div class="xp"><i id="xpbar"></i></div>
+      <div class="xp-txt"><span id="xptxt">0 / 240 XP</span><span id="boost" class="boost" hidden>×2 XP BOOST</span></div>
+      <div class="hp"><i id="hptrail"></i><i id="hpbar"></i></div>
+      <div class="hp-txt"><span>HEALTH<span class="hp-regen"> · REGENERATING</span></span><b id="hptxt">100</b></div>
+    </div>
+    <div id="ammo" class="hudp">
+      <div class="am-label">MINES REMAINING</div>
+      <div class="am-num"><b id="minesleft">40</b><span>/ <span id="minestotal">40</span></span></div>
+      <div class="am-row"><span>FLAGS <b id="flagsn">0</b></span><span>TIME <b id="timer">00:00</b></span></div>
+      <div class="am-eq">EQUIPPED · <span id="equip">STANDARD-ISSUE FINGER</span></div>
+    </div>
+    <div id="prompts"><span class="kb"><kbd>LMB</kbd>REVEAL</span><span class="kb"><kbd>RMB</kbd>FLAG</span><span class="kb"><kbd>F</kbd>PAY RESPECTS</span><span class="kb"><kbd>ESC</kbd>MENU</span><button id="respects" hidden><kbd>F</kbd> PAY RESPECTS</button><button id="flagmode" class="hbtn">FLAG MODE: OFF</button></div>
+    <div id="tip" class="hudp" hidden><b>TIP</b><p id="tip-t"></p></div>
+    <div id="autosave" hidden><i class="spin"></i> AUTOSAVING · DO NOT TURN OFF YOUR COMPUTER</div>
+    <div id="combo"></div>
+    <div id="chapter"><div class="ch-k">CHAPTER ONE</div><div class="ch-t">SECTOR B-4</div><div class="ch-s">06:42 LOCAL · OPERATION: CLEAN SWEEP</div></div>
+  </div>
+</section>
+
+<div id="pause" class="ovl" hidden>
+  <div class="pz">
+    <div class="pz-k">PAUSED</div>
+    <div class="pz-s" id="pz-s">Sector B-4 · Normal</div>
+    <nav class="menu">
+      <button data-p="resume">RESUME</button>
+      <button data-p="quests">QUEST LOG</button>
+      <button data-p="skills">SKILLS<small id="pz-sp">No unspent points</small></button>
+      <button data-p="store">STORE<small class="hot">LIMITED TIME OFFERS</small></button>
+      <button data-p="ach">ACHIEVEMENTS</button>
+      <button data-p="settings">SETTINGS</button>
+      <button data-p="restart">RESTART FIELD</button>
+      <button data-p="title">QUIT TO MAIN MENU</button>
+      <button data-p="desktop">QUIT TO DESKTOP</button>
+    </nav>
+    <div class="pz-f">Online · Server EU-Central-7 · 0 friends playing · The game is not paused online</div>
+  </div>
+</div>
+<div id="panel" class="ovl" hidden><div class="pn" role="dialog" aria-label="Menu"><div class="pn-tabs" id="pn-tabs"></div><div class="pn-body" id="pn-body"></div></div></div>
+<div id="death" class="ovl" hidden><div class="dt"><div class="dt-t">MISSION FAILED</div><div class="dt-s">You were killed by a mine</div><blockquote id="dt-q"></blockquote><div class="dt-bar"><i id="dt-bar"></i></div><div class="dt-st" id="dt-st"></div></div></div>
+<div id="results" class="ovl" hidden><div class="rs" id="rs"></div></div>
+<div id="credits" hidden>
+  <div id="cr-cards"></div>
+  <div id="cr-stage" hidden>
+    <div class="cr-art"><div class="cr-frame" id="cr-frame"><canvas id="cr-a"></canvas><canvas id="cr-b"></canvas></div><div class="cr-cap" id="cr-cap"></div></div>
+    <div class="cr-roll" id="cr-roll"><div class="cr-list" id="cr-list"></div></div>
+  </div>
+  <div id="cr-ui"><span id="cr-count">POSITIONS CREDITED 0000 / 1,412</span><span class="cr-hint">HOLD <kbd>SPACE</kbd> OR PRESS AND HOLD TO FAST-FORWARD</span><button id="cr-skip" class="hbtn">SKIP CREDITS</button></div>
+</div>
+<div id="toasts"></div>
+<div id="banner"><div class="bn-k"></div><div class="bn-t"></div><div class="bn-s"></div></div>
+<div id="letterbox"><i></i><i></i></div>
+<div id="fade"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

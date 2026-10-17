@@ -1,0 +1,21 @@
+// audio/voice-bank.js — Loads, decodes and caches the voice-line MP3s (LRU cache with pinned ids).
+import {VOICES} from '../data/voice-manifest.js';
+import {PIN} from '../data/dialogue.js';
+import {A} from './engine.js';
+import {VM} from './voices.js';
+
+function b64ToBuf(b){const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer;}
+// Voice audio comes from public/voices/<id>.mp3. The single-file build (tools/build/build-single.mjs)
+// inlines every file as base64 into window.__VOICE_B64 instead, so the page works without a server.
+export const voiceUrl=id=>`voices/${id}.mp3`;
+function loadVoiceData(id){const inl=globalThis.__VOICE_B64;if(inl&&inl[id])return Promise.resolve(b64ToBuf(inl[id]));
+  return fetch(voiceUrl(id)).then(r=>{if(!r.ok)throw new Error('voice '+id+': HTTP '+r.status);return r.arrayBuffer();});}
+export function decodeOne(id){
+  if(A.buffers[id])return Promise.resolve(A.buffers[id]); if(A.pending[id])return A.pending[id];
+  const v=VOICES[id]; if(!v||!A.ctx)return Promise.resolve(null);
+  A.pending[id]=new Promise(res=>{let done=false;const ok=b=>{if(done)return;done=true;A.buffers[id]=b;touchBuf(id);res(b);};const bad=()=>{if(done)return;done=true;res(null);};
+    loadVoiceData(id).then(buf=>{const p=A.ctx.decodeAudioData(buf,ok,bad);if(p&&p.then)p.then(ok,bad);}).catch(bad);});
+  return A.pending[id];
+}
+export function touchBuf(id){const i=A.lru.indexOf(id);if(i>=0)A.lru.splice(i,1);A.lru.push(id);let guard=0;while(A.lru.length>52&&guard++<80){const old=A.lru.find(x=>!PIN.has(x)&&!VM.active.some(v=>v.id===x)&&x!==VM.queued);if(!old)break;A.lru.splice(A.lru.indexOf(old),1);delete A.buffers[old];delete A.pending[old];}}
+export async function predecode(ids){for(const id of ids)if(id&&VOICES[id])await decodeOne(id);}

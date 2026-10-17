@@ -1,0 +1,10 @@
+import fs from 'fs';
+const D='/tmp/claude-0/-home-claude/d78743a1-6a1d-564d-bbd8-066f6fc59d0d/scratchpad/';
+const src=fs.readFileSync(D+'template.html','utf8');
+const css=src.slice(src.indexOf('<style>')+7,src.indexOf('</style>'));
+const body=src.slice(src.indexOf('</style>')+8,src.indexOf('<script>'));
+const js0=src.slice(src.indexOf('<script>')+8,src.lastIndexOf('</script>'));
+const a=js0.indexOf("'use strict';\n")+14, b=js0.lastIndexOf('})();');
+const js=js0.slice(a,b);
+fs.writeFileSync('parts/css.css',css);fs.writeFileSync('parts/body.html',body);fs.writeFileSync('parts/game.js',js);
+console.log(css.length,body.length,js.length);

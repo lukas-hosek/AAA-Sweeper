@@ -1,0 +1,32 @@
+{
+  "name": "triple-a-sweeper",
+  "version": "1.0.7",
+  "description": "Minesweeper, but it is a AAA game. Remastered. Definitive. Game of the Year Edition.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "node tools/build/build-single.mjs",
+    "build:artifact": "node tools/build/build-single.mjs --artifact",
+    "build:site": "vite build",
+    "preview": "vite preview",
+    "smoke": "node tools/browser/smoke.mjs",
+    "smoke:single": "node tools/browser/smoke.mjs --target single",
+    "smoke:site": "node tools/browser/smoke.mjs --target site",
+    "shot": "node tools/browser/screenshot.mjs",
+    "ost": "node tools/ost/render-ost.mjs && python3 tools/ost/encode_ost.py",
+    "ost:render": "node tools/ost/render-ost.mjs",
+    "ost:encode": "python3 tools/ost/encode_ost.py",
+    "ost:cover": "node tools/ost/make-cover.mjs",
+    "voices": "python3 tools/tts/generate_voices.py",
+    "voices:check": "python3 tools/tts/generate_voices.py --check"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "playwright": "1.63.0",
+    "vite": "8.3.2"
+  }
+}

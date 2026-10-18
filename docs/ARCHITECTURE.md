@@ -321,6 +321,7 @@ There is **no build step**. The browser loads the source files directly: `index.
 4. **Registry:** add a `Chapter` to `CHAPTERS` in `game/chapters.js`, with the texts, voice ids, `tileset: new MyTileset()`, `sceneryClass: MyScenery` and `musicTheme`.
 5. **Chatter:** add `CHAPTER_CHATTER.<id>` in `data/chatter.js`, and generate the lines (see [VOICES.md](VOICES.md)).
 6. Check it: `biome lint`, `scripts/check_style.sh`, `scripts/smoke.sh` and `scripts/smoke.sh --mobile`. Then look at the screenshots, in all three layouts if the HUD changed.
+7. **Docs:** add `docs/levels/<n>-<name>.md` with a row in its README, and update the character files of everyone who speaks in it (`docs/characters/`).
 
 **Add a sound effect:** add a method to `SoundEffects` (`audio/sound-effects.js`) built from `audioEngine.PlayTone` and `PlayNoise`, sending to `audioEngine.effectsBus` (and `effectsReverbSend` for reverb). Add it to `SOUND_EFFECTS` in `debug.js`, so the golden comparison fingerprints it.
 

@@ -91,6 +91,7 @@ Event barks have descriptive names: `r_hit3`, `j_low`, `s_ach`, `a_ch5p`.
    - **Any chapter:** add it to `SHARED_CHATTER` (played after the arcs) or `REPEATABLE_LINES`.
    - **Event bark:** call `voices.Bark('<id>', '<cooldownKey>', seconds)` where the event happens. If it must play instantly, add the id to `PINNED_LINES` so it stays decoded.
    - **Quest on a line:** map the id to a side-quest id in `SIDE_QUEST_AFTER_LINE`.
-4. **Check:** `scripts/bake_voices.sh --check`, `biome lint`, then `scripts/smoke.sh`. Commit the new MP3 together with `lines.py`, the manifest and the code that uses it.
+4. **Document it:** add the line to its chapter's file in [levels/](levels/README.md) (chapter lines, with the full subtitle) or to its speaker's file in [characters/](characters/README.md) (event barks and shared lines), and mention it in the speaker's arc if it moves their story.
+5. **Check:** `scripts/bake_voices.sh --check`, `biome lint`, then `scripts/smoke.sh`. Commit the new MP3 together with `lines.py`, the manifest, the code that uses it and the docs.
 
 **Removing a line:** delete it from `lines.py`, its MP3 and its manifest row (or regenerate the manifest), and remove every reference in `js/`.

@@ -76,7 +76,8 @@ assets/           fonts/ (self-hosted woff2), voices/ (<id>.mp3, committed), ico
 scripts/          setup, startup, shutdown, smoke, golden, unit_tests, check_style, bake_voices, export_ost (bash wrappers)
 tools/            serve.py, check_style.py, lib/env.py (Playwright helpers), browser/ (smoke, golden, unit tests,
                   screenshot), ost/, tts/, legacy/
-docs/             GAME_DESIGN, ARCHITECTURE, AUDIO, MUSIC, VOICES, TESTING, SETUP (+ images/)
+docs/             GAME_DESIGN, ARCHITECTURE, AUDIO, MUSIC, VOICES, TESTING, SETUP (+ images/),
+                  characters/ (one file per speaker), levels/ (one file per chapter)
 reference/        original single-file game (v11) + history/ snapshots; read-only
 requirements.txt  pinned Python packages;  biome.json  lint config;  jsconfig.json  type checking;  .vscode/  tasks, launch, settings
 ```
@@ -87,6 +88,10 @@ Read the matching doc before larger work:
 - `docs/VOICES.md`: TTS lines
 - `docs/GAME_DESIGN.md`: tone, cast, systems
 - `docs/TESTING.md`: smoke, golden, unit tests, lint, style check, type checking, hooks
+- `docs/characters/`: one file per character: personality, quirks, story arc, where they appear, their event barks and shared lines
+- `docs/levels/`: one file per chapter: original prompt, artistic intention, mechanics, cast and the full text of its unique voice lines
+
+**Keep `docs/characters/` and `docs/levels/` up to date.** Any change to a voice line, a speaker, a chapter, chatter wiring (`js/data/chatter.js`), victory or opening lines, or a side quest must update the matching files in the same change. A new speaker or chapter gets a new file and a row in that folder's README. Quote lines by their subtitle text.
 
 ## Git: non-destructive commands only
 
@@ -121,7 +126,8 @@ The owner commits, merges and pushes.
 1. Add the line to the newest batch in `tools/tts/lines.py`. Spell names out for TTS ("Pathos four"), and put the display subtitle in the 4th tuple field.
 2. `scripts/bake_voices.sh <id>` writes `assets/voices/<id>.mp3` and the manifest entry. It takes about a second per line on the CPU.
 3. Wire it in: `CHAPTER_CHATTER` / `SHARED_CHATTER` / `REPEATABLE_LINES` / `PINNED_LINES` / `SIDE_QUEST_AFTER_LINE` in `js/data/chatter.js`, or `voices.Bark()` in the game code. Batch-1 subtitles live in `js/data/subtitles.js`.
-4. Check with `scripts/bake_voices.sh --check`, `biome lint` and `scripts/smoke.sh`.
+4. Document it in `docs/levels/<chapter>.md` (chapter lines) or `docs/characters/<speaker>.md` (barks, shared lines), and update the speaker's arc if the line moves their story.
+5. Check with `scripts/bake_voices.sh --check`, `biome lint` and `scripts/smoke.sh`.
 
 Baked MP3s are committed by the owner; the model files are not. The radio effects (filtering, saturation, echo, squelch) are applied live in `js/audio/voice-manager.js`, not baked into the MP3s.
 
@@ -150,7 +156,8 @@ Baked MP3s are committed by the owner; the model files are not. The radio effect
 3. Run `scripts/smoke.sh` (plus `--mobile` for UI work). It must pass with no page errors. Run `scripts/unit_tests.sh` after touching the Minesweeper rules, and `scripts/golden.sh compare` after a refactor.
 4. **Look at the screenshots.**
 5. For audio, check state via hooks; for music, render and inspect.
-6. Summarise for the owner what changed, what you verified, and which files to commit.
+6. If the change touched characters, chapters or voice lines, update `docs/characters/` and `docs/levels/`.
+7. Summarise for the owner what changed, what you verified, and which files to commit.
 
 ## Reference material (read-only: don't edit, don't run)
 

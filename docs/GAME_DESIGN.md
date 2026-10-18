@@ -83,6 +83,8 @@ Snapshots of the single-file source at each milestone are in `reference/history/
 | 5 | **Pathos-4** | Deep Sweep | Flooding sea base, Deck C: portholes with fish, pipes, valves, hazard stripes, alarm lights, rising water | Corroded bulkheads, flooded grating | `pathos`: F Lydian, 62 BPM, pan flute, ocarina, harp, 6.5 s reverb, whale calls | Reyes, HALCYON (station AI) |
 | 6 | **Mom's Backyard** | Come Home | Suburban sunset, house, fence, TV, garden gnome, tulips | Striped lawn with flowers | `home`: swung e-piano and whistle, 88 BPM | Mom |
 
+Each chapter has its own file in [levels/](levels/README.md): the original request, the artistic intention, its mechanics and every voice line unique to it.
+
 **Da Club also comes to you.** If Big Dez's last line (`d_5`: "If you won't come to the club, the club is coming to you!") plays in another chapter, "THE CLUB HAS ARRIVED" for 24 seconds: club music, dance-floor lighting and +500 XP.
 
 ![Sector B-4](images/ch1-sector-b4.jpg)
@@ -190,6 +192,8 @@ All voices are synthesised with Kokoro TTS (see [VOICES.md](VOICES.md)). Radio v
 | `announcer` | (trailer voice) | Title and chapter names, no subtitles | `am_fenrir` ×0.82 |
 
 There are 197 lines in total. Chatter rules: each chapter has its own arcs per character plus a shared pool and repeats. See [AUDIO.md](AUDIO.md#5-radio-chatter-manager).
+
+Each character has their own file in [characters/](characters/README.md): personality, quirks, story arc and where they appear.
 
 ## 8. Credits
 

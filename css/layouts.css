@@ -1,41 +1,252 @@
-/* layouts chosen by script */
-#game.L-mid #feed,#game.L-narrow #feed{display:none}
-#game.L-mid #radio{left:50%;top:calc(62px + env(safe-area-inset-top,0px));bottom:auto;transform:translate(-50%,-10px);width:min(350px,calc(100vw - 520px));min-width:260px}
-#game.L-mid #radio.on{transform:translate(-50%,0)}
-#game.L-mid #tip{left:50%;top:calc(166px + env(safe-area-inset-top,0px));transform:translate(-50%,-10px);width:min(360px,calc(100vw - 520px));min-width:240px}
-#game.L-mid #tip.on{transform:translate(-50%,0)}
-#game.L-mid #subs{width:min(640px,calc(100vw - 32px));bottom:calc(150px + env(safe-area-inset-bottom,0px))}
-#game.L-mid #prompts .kb{display:none}
-#game.L-narrow #compass{width:calc(100vw - 230px);min-width:140px;height:42px;top:calc(4px + env(safe-area-inset-top,0px))}
-#game.L-narrow #tr{width:84px;top:calc(8px + env(safe-area-inset-top,0px));right:max(10px,env(safe-area-inset-right,0px));gap:5px}
-#game.L-narrow .mm{width:84px;height:84px}
-#game.L-narrow .mm-lab,#game.L-narrow .season,#game.L-narrow .tr-row{display:none}
-#game.L-narrow .tr-btns{flex-direction:column;gap:4px}
-#game.L-narrow .hbtn{padding:5px 4px;font-size:9px;letter-spacing:.08em}
-#game.L-narrow #quests{top:calc(48px + env(safe-area-inset-top,0px));left:max(10px,env(safe-area-inset-left,0px));width:calc(100vw - 124px);padding:8px 10px}
-#game.L-narrow .q-title{font-size:13px;margin:1px 0 5px}
-#game.L-narrow #q-obj li:nth-child(n+2){display:none}
-#game.L-narrow #q-side{margin-top:5px;padding-top:5px}
-#game.L-narrow #q-side .qs-o,#game.L-narrow .q-hint{display:none}
-#game.L-narrow #player{left:max(10px,env(safe-area-inset-left,0px));bottom:calc(58px + env(safe-area-inset-bottom,0px));width:calc(56vw - 34px);padding:7px 9px}
-#game.L-narrow .lvl{width:26px;height:26px;font-size:17px}
-#game.L-narrow .pl-name{font-size:11px}
-#game.L-narrow .pl-name small,#game.L-narrow .xp-txt,#game.L-narrow .nag,#game.L-narrow .hp-regen{display:none}
-#game.L-narrow #ammo{right:max(10px,env(safe-area-inset-right,0px));bottom:calc(58px + env(safe-area-inset-bottom,0px));width:calc(44vw - 42px);padding:7px 9px}
-#game.L-narrow .am-num b{font-size:38px}
-#game.L-narrow .am-num span{font-size:16px}
-#game.L-narrow .am-eq,#game.L-narrow .am-label{display:none}
-#game.L-narrow .am-row{gap:8px}
-#game.L-narrow #radio{left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));width:auto;bottom:calc(170px + env(safe-area-inset-bottom,0px));padding:6px;gap:8px}
-#game.L-narrow .pt{width:46px;height:46px}
-#game.L-narrow .rd-name{font-size:14px}
-#game.L-narrow #subs{width:calc(100vw - 20px);min-width:0;bottom:calc(240px + env(safe-area-inset-bottom,0px))}
-#game.L-narrow .sub{font-size:13px;padding:4px 8px}
-#game.L-narrow #prompts{bottom:calc(10px + env(safe-area-inset-bottom,0px));gap:10px}
-#game.L-narrow #prompts .kb{display:none}
-#game.L-narrow #flagmode{display:block}
-#game.L-narrow #tip{display:none}
-#game.L-narrow #autosave{bottom:calc(132px + env(safe-area-inset-bottom,0px));font-size:9px}
-#game.L-narrow #combo{top:calc(126px + env(safe-area-inset-top,0px))}
-@media (max-width:560px){.rs-g{grid-template-columns:1fr;justify-items:center}.rank{width:96px;height:96px;font-size:72px}.set{grid-template-columns:1fr}.set .note{grid-column:1}}
-@media (prefers-reduced-motion:reduce){.tk-in{animation-duration:160s}#fx-grain{animation:none}.card{transition:opacity .6s}}
+/*
+ * HUD layouts chosen by script (js/render/layout.js puts layout-wide, layout-mid or layout-narrow on #game).
+ * The base rules in hud.css are the wide layout.
+ */
+
+
+/* --- Mid and narrow layouts: no kill feed --- */
+#game.layout-mid #kill-feed,
+#game.layout-narrow #kill-feed {
+	display: none;
+}
+
+
+/* --- Mid layout (900–1179 px): radio and tip move to the top centre --- */
+#game.layout-mid #radio-panel {
+	left: 50%;
+	top: calc(62px + env(safe-area-inset-top, 0px));
+	bottom: auto;
+	transform: translate(-50%, -10px);
+	width: min(350px, calc(100vw - 520px));
+	min-width: 260px;
+}
+
+#game.layout-mid #radio-panel.is-active {
+	transform: translate(-50%, 0);
+}
+
+#game.layout-mid #tip-box {
+	left: 50%;
+	top: calc(166px + env(safe-area-inset-top, 0px));
+	transform: translate(-50%, -10px);
+	width: min(360px, calc(100vw - 520px));
+	min-width: 240px;
+}
+
+#game.layout-mid #tip-box.is-active {
+	transform: translate(-50%, 0);
+}
+
+#game.layout-mid #subtitles {
+	width: min(640px, calc(100vw - 32px));
+	bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+}
+
+#game.layout-mid #key-prompts .key-prompt {
+	display: none;
+}
+
+#game.layout-mid.is-pathos-chapter #tip-box {
+	display: none;
+}
+
+
+/* --- Narrow layout (phones): compact panels, no tip box --- */
+#game.layout-narrow #compass {
+	width: calc(100vw - 230px);
+	min-width: 140px;
+	height: 42px;
+	top: calc(4px + env(safe-area-inset-top, 0px));
+}
+
+#game.layout-narrow #top-right {
+	width: 84px;
+	top: calc(8px + env(safe-area-inset-top, 0px));
+	right: max(10px, env(safe-area-inset-right, 0px));
+	gap: 5px;
+}
+
+#game.layout-narrow .minimap {
+	width: 84px;
+	height: 84px;
+}
+
+#game.layout-narrow .minimap-label,
+#game.layout-narrow .season-pass,
+#game.layout-narrow .coin-row {
+	display: none;
+}
+
+#game.layout-narrow .hud-buttons {
+	flex-direction: column;
+	gap: 4px;
+}
+
+#game.layout-narrow .hud-button {
+	padding: 5px 4px;
+	font-size: 9px;
+	letter-spacing: 0.08em;
+}
+
+#game.layout-narrow #quest-tracker {
+	top: calc(48px + env(safe-area-inset-top, 0px));
+	left: max(10px, env(safe-area-inset-left, 0px));
+	width: calc(100vw - 124px);
+	padding: 8px 10px;
+}
+
+#game.layout-narrow .quest-title {
+	font-size: 13px;
+	margin: 1px 0 5px;
+}
+
+#game.layout-narrow #quest-objectives li:nth-child(n+2) {
+	display: none;
+}
+
+#game.layout-narrow #side-quest {
+	margin-top: 5px;
+	padding-top: 5px;
+}
+
+#game.layout-narrow #side-quest .side-quest-objective,
+#game.layout-narrow .quest-hint {
+	display: none;
+}
+
+#game.layout-narrow #player-panel {
+	left: max(10px, env(safe-area-inset-left, 0px));
+	bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+	width: calc(56vw - 34px);
+	padding: 7px 9px;
+}
+
+#game.layout-narrow .level-badge {
+	width: 26px;
+	height: 26px;
+	font-size: 17px;
+}
+
+#game.layout-narrow .player-name {
+	font-size: 11px;
+}
+
+#game.layout-narrow .player-name small,
+#game.layout-narrow .xp-text,
+#game.layout-narrow .nag-button,
+#game.layout-narrow .health-regen {
+	display: none;
+}
+
+#game.layout-narrow #ammo-panel {
+	right: max(10px, env(safe-area-inset-right, 0px));
+	bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+	width: calc(44vw - 42px);
+	padding: 7px 9px;
+}
+
+#game.layout-narrow .ammo-count b {
+	font-size: 38px;
+}
+
+#game.layout-narrow .ammo-count span {
+	font-size: 16px;
+}
+
+#game.layout-narrow .ammo-equipped,
+#game.layout-narrow .ammo-label {
+	display: none;
+}
+
+#game.layout-narrow .ammo-row {
+	gap: 8px;
+}
+
+#game.layout-narrow #radio-panel {
+	left: max(10px, env(safe-area-inset-left, 0px));
+	right: max(10px, env(safe-area-inset-right, 0px));
+	width: auto;
+	bottom: calc(170px + env(safe-area-inset-bottom, 0px));
+	padding: 6px;
+	gap: 8px;
+}
+
+#game.layout-narrow .radio-portrait {
+	width: 46px;
+	height: 46px;
+}
+
+#game.layout-narrow .radio-name {
+	font-size: 14px;
+}
+
+#game.layout-narrow #subtitles {
+	width: calc(100vw - 20px);
+	min-width: 0;
+	bottom: calc(240px + env(safe-area-inset-bottom, 0px));
+}
+
+#game.layout-narrow .subtitle {
+	font-size: 13px;
+	padding: 4px 8px;
+}
+
+#game.layout-narrow #key-prompts {
+	bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+	gap: 10px;
+}
+
+#game.layout-narrow #key-prompts .key-prompt {
+	display: none;
+}
+
+#game.layout-narrow #flag-mode-button {
+	display: block;
+}
+
+#game.layout-narrow #tip-box {
+	display: none;
+}
+
+#game.layout-narrow #autosave-indicator {
+	bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+	font-size: 9px;
+}
+
+#game.layout-narrow #combo-text {
+	top: calc(126px + env(safe-area-inset-top, 0px));
+}
+
+
+/* --- Small screens --- */
+@media (max-width: 560px) {
+	.results-grid {
+		grid-template-columns: 1fr;
+		justify-items: center;
+	}
+	.results-rank {
+		width: 96px;
+		height: 96px;
+		font-size: 72px;
+	}
+	.settings-grid {
+		grid-template-columns: 1fr;
+	}
+	.settings-grid .settings-note {
+		grid-column: 1;
+	}
+}
+
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+	.news-ticker-text {
+		animation-duration: 160s;
+	}
+	#film-grain {
+		animation: none;
+	}
+	.logo-card {
+		transition: opacity 0.6s;
+	}
+}

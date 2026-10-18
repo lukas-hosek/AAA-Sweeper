@@ -1,8 +1,18 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
-  "files": { "includes": ["js/**/*.js", "css/**/*.css"] },
-  "formatter": { "enabled": false },
-  "assist": { "enabled": false },
+  "files": {
+    "includes": [
+      "js/**/*.js",
+      "css/**/*.css",
+      "tools/browser/unit/**/*.js"
+    ]
+  },
+  "formatter": {
+    "enabled": false
+  },
+  "assist": {
+    "enabled": false
+  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -19,5 +29,273 @@
         "noAssignInExpressions": "off"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "js/**/*.js",
+        "tools/browser/unit/**/*.js"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": {
+              "level": "error",
+              "options": {
+                "strictCase": false,
+                "requireAscii": true,
+                "conventions": [
+                  {
+                    "selector": {
+                      "kind": "class"
+                    },
+                    "formats": [
+                      "PascalCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "function"
+                    },
+                    "formats": [
+                      "PascalCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "classMethod"
+                    },
+                    "formats": [
+                      "PascalCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "objectLiteralMethod"
+                    },
+                    "formats": [
+                      "PascalCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "classGetter"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "classSetter"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "classProperty",
+                      "modifiers": [
+                        "static"
+                      ]
+                    },
+                    "formats": [
+                      "camelCase",
+                      "CONSTANT_CASE"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "classProperty"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "objectLiteralProperty"
+                    },
+                    "formats": [
+                      "camelCase",
+                      "CONSTANT_CASE"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "const",
+                      "scope": "global"
+                    },
+                    "formats": [
+                      "camelCase",
+                      "CONSTANT_CASE"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "variable"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "functionParameter"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "catchParameter"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "js/data/subtitles.js",
+        "js/data/chatter.js",
+        "js/data/voice-manifest.js"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": {
+              "level": "error",
+              "options": {
+                "strictCase": false,
+                "requireAscii": true,
+                "conventions": [
+                  {
+                    "selector": {
+                      "kind": "class"
+                    },
+                    "formats": [
+                      "PascalCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "function"
+                    },
+                    "formats": [
+                      "PascalCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "classMethod"
+                    },
+                    "formats": [
+                      "PascalCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "objectLiteralMethod"
+                    },
+                    "formats": [
+                      "PascalCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "classGetter"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "classSetter"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "classProperty",
+                      "modifiers": [
+                        "static"
+                      ]
+                    },
+                    "formats": [
+                      "camelCase",
+                      "CONSTANT_CASE"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "classProperty"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "objectLiteralProperty"
+                    },
+                    "formats": [
+                      "camelCase",
+                      "CONSTANT_CASE",
+                      "snake_case"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "const",
+                      "scope": "global"
+                    },
+                    "formats": [
+                      "camelCase",
+                      "CONSTANT_CASE"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "variable"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "functionParameter"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  },
+                  {
+                    "selector": {
+                      "kind": "catchParameter"
+                    },
+                    "formats": [
+                      "camelCase"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

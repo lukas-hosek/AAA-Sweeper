@@ -17,11 +17,11 @@ with serve_game(args().get('url')) as url, sync_playwright() as p:
     page = new_page(browser, width=1000, height=1000)
     try:
         open_game(page, url)
-        t(page, '__t.title()')
+        t(page, 'testHooks.ShowTitle()')
         page.wait_for_timeout(3500)
         page.evaluate("""() => {
-          document.querySelectorAll('.ticker,.ti-build').forEach(e => (e.style.display = 'none'));
-          const p = document.querySelector('#press'); p.textContent = 'ORIGINAL GAME SOUNDTRACK'; p.style.animation = 'none'; p.style.opacity = '.85';
+          document.querySelectorAll('.news-ticker, .title-build-info').forEach(e => (e.style.display = 'none'));
+          const p = document.querySelector('#press-any-key'); p.textContent = 'ORIGINAL GAME SOUNDTRACK'; p.style.animation = 'none'; p.style.opacity = '.85';
         }""")
         page.wait_for_timeout(300)
         page.screenshot(path=out, type='jpeg', quality=92)

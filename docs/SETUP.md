@@ -120,7 +120,7 @@ Open the project folder (*File → Open Folder*). `.vscode/` contains:
   - Bake voices, Check voices
 - **Launch configurations** (*Run and Debug*, or F5 in VS Code):
   - **Play in Chromium (debugger)** starts the dev server if needed and opens Chromium with VS Code's debugger attached, so breakpoints in `js/` work.
-  - **Play in Chromium with test hooks (?debug)** does the same with the `__t` hooks loaded.
+  - **Play in Chromium with test hooks (?debug)** does the same with the test hooks (`window.testHooks`) loaded.
   - Stopping the debug session leaves the server running.
   - They expect `/usr/bin/chromium`; for Google Chrome, change `runtimeExecutable` in `launch.json`.
 - **Settings:**
@@ -152,7 +152,7 @@ The first run opens a browser window to log in. Claude Code automatically reads 
 - *"Generate five more lines for Mom in Mom's Backyard and wire them into her arc."*
 - *"Export the soundtrack."*
 
-Claude Code asks permission before running commands. Allowing `scripts/…`, `.venv/bin/python tools/…`, `biome lint` and `ffmpeg` for the session makes it much smoother. CLAUDE.md limits Claude to read-only git commands; you stage, commit and push yourself.
+Claude Code asks permission before running commands. Allowing `scripts/…`, `.venv/bin/python tools/…`, `biome lint` and `ffmpeg` for the session makes it much smoother. CLAUDE.md limits Claude to non-destructive git commands. It stages files (`git add`) only when you ask, and you commit and push yourself.
 
 ## 7. Everyday commands (cheat sheet)
 

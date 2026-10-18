@@ -5,9 +5,9 @@ Typical use (see tools/browser/screenshot.py for a complete example):
 
     with serve_game(A.get('url')) as url, sync_playwright() as p:
         browser = launch(p); page = new_page(browser)
-        open_game(page, url); t(page, "__t.start('normal', 2)")
+        open_game(page, url); t(page, "testHooks.StartChapter('normal', 2)")
 """
-import os, sys, threading
+import os, shutil, sys, tempfile, threading
 from contextlib import contextmanager
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -31,16 +31,27 @@ def args(argv=None):
 
 
 @contextmanager
-def serve_game(url=None):
-    """Yield the game's URL: `url` if given (e.g. the running dev server), else a private server on a free port."""
+def serve_game(url=None, snapshot=False, source=None):
+    """Yield the game's URL: `url` if given (e.g. the running dev server), else a private server on a free port.
+    snapshot=True serves a copy of the game files taken now, so edits made during a long run don't leak into it.
+    source: serve the game files of another folder (e.g. a saved copy of an older version) instead of the project."""
     if url:
         yield url; return
-    srv = make_server('127.0.0.1', 0, quiet=True)
+    root = source or ROOT
+    if snapshot:
+        root = tempfile.mkdtemp(prefix='aaa-sweeper-snapshot-')
+        source = source or ROOT
+        shutil.copy2(os.path.join(source, 'index.html'), root)
+        for folder in ('css', 'js', 'assets'):
+            shutil.copytree(os.path.join(source, folder), os.path.join(root, folder))
+    srv = make_server('127.0.0.1', 0, quiet=True, root=root)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     try:
         yield f'http://127.0.0.1:{srv.server_address[1]}/'
     finally:
         srv.shutdown(); srv.server_close()
+        if snapshot:
+            shutil.rmtree(root, ignore_errors=True)
 
 
 def launch(p):
@@ -65,11 +76,11 @@ def new_page(browser, width=1440, height=900, mobile=False):
 
 
 def open_game(page, url):
-    """Load the game with debug hooks (window.__t) and wait until they are ready."""
+    """Load the game with debug hooks (window.testHooks, see js/debug.js) and wait until they are ready."""
     page.goto(url + ('&' if '?' in url else '?') + 'debug')
-    page.wait_for_function('window.__debugReady === true', timeout=20000)
+    page.wait_for_function('window.testHooksReady === true', timeout=20000)
 
 
 def t(page, expr):
-    """Evaluate a hook expression, e.g. t(page, "__t.start('normal', 2)"). Promises are not awaited."""
+    """Evaluate a hook expression, e.g. t(page, "testHooks.StartChapter('normal', 2)"). Promises are not awaited."""
     return page.evaluate(f"(()=>{{const r=({expr});return (r&&typeof r.then==='function')?null:r;}})()")

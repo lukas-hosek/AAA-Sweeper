@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 from env import ROOT, args, serve_game, launch, new_page, open_game  # noqa: E402
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-# Steps per full variation cycle of each theme (see docs/MUSIC.md). Seconds per step come from STEP in js/audio/music.js.
+# Steps per full variation cycle of each theme (see docs/MUSIC.md). Seconds per step come from testHooks.MusicStepSeconds().
 CYCLE = {'title': 32, 'game': 128, 'desert': 128, 'club': 128, 'arctic': 64, 'pathos': 128, 'home': 64, 'win': 32, 'credits': 192}
 MIN_SEC, FADE_SEC = 100, 10
 
@@ -31,12 +31,12 @@ with serve_game(A.get('url')) as url, sync_playwright() as p:
     try:
         open_game(page, url)
         for m in themes:
-            step = page.evaluate(f"__t.step('{m}')")
+            step = page.evaluate(f"testHooks.MusicStepSeconds('{m}')")
             cycle_sec = CYCLE[m] * step
             loops = max(2, math.ceil(MIN_SEC / cycle_sec))
             t0 = time.time()
             with page.expect_download(timeout=600000) as dl:
-                r = page.evaluate(f"window.__render('{m}', {CYCLE[m] * loops}, {FADE_SEC})")
+                r = page.evaluate(f"musicExporter.Render('{m}', {CYCLE[m] * loops}, {FADE_SEC})")
             dl.value.save_as(os.path.join(OUT, m + '.wav'))
             info[m] = {**r, 'loops': loops, 'cycleSec': round(cycle_sec, 2)}
             print(f"{m:8s} {r['sec']:.1f} s  ({loops} x {cycle_sec:.1f} s cycle, peak gain {r['gainDb']:.1f} dB)  rendered in {time.time() - t0:.1f} s", flush=True)

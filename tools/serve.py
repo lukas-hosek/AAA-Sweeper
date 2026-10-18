@@ -24,9 +24,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map,
                       '.js': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg'}
     quiet = False
+    root = ROOT
 
     def __init__(self, *a, **k):
-        super().__init__(*a, directory=ROOT, **k)
+        super().__init__(*a, directory=self.root, **k)
 
     def send_head(self):  # used by GET and HEAD
         rel = posixpath.normpath(urllib.parse.unquote(urllib.parse.urlsplit(self.path).path)).lstrip('/')
@@ -53,9 +54,10 @@ class Server(http.server.ThreadingHTTPServer):
             super().handle_error(request, client_address)
 
 
-def make_server(host='127.0.0.1', port=8080, quiet=False):
-    """A ready-to-run server (call .serve_forever()). port=0 picks a free port: see .server_address."""
-    return Server((host, port), type('QuietHandler' if quiet else 'Handler', (Handler,), {'quiet': quiet}))
+def make_server(host='127.0.0.1', port=8080, quiet=False, root=ROOT):
+    """A ready-to-run server (call .serve_forever()). port=0 picks a free port: see .server_address.
+    root: folder holding index.html, css/, js/ and assets/ (default: the project)."""
+    return Server((host, port), type('QuietHandler' if quiet else 'Handler', (Handler,), {'quiet': quiet, 'root': root}))
 
 
 def main():

@@ -1,18 +1,97 @@
-/* Layout: four full-viewport stages stacked as fixed screens (desktop → intro → title → game).
-   The game is one canvas (scene + board + effects) under a DOM HUD that lets clicks fall through. */
-:root{
-  --w98-teal:#008080; --w98-face:#c0c0c0; --w98-hi:#ffffff; --w98-lite:#dfdfdf; --w98-shadow:#808080; --w98-navy:#000080; --w98-blue:#1084d0;
-  --ink:#e9eef2; --ink-dim:#9aabb6; --gold:#f2c14e; --gold-hi:#ffd77a; --red:#ff3d3d; --panel:rgba(7,13,19,.74); --panel-lo:rgba(7,13,19,.38); --line:rgba(233,238,242,.14);
-  --f-ui:"Chakra Petch","Segoe UI",system-ui,sans-serif;
-  --f-num:"Teko","Bahnschrift","Arial Narrow",sans-serif;
-  --f-epic:"Cinzel","Trajan Pro",Georgia,serif;
-  --f-w98:Tahoma,"MS Sans Serif",Geneva,Verdana,sans-serif;
-  color-scheme:dark;
+/*
+ * Tokens and page basics.
+ *
+ * Layout: four full-viewport stages stacked as fixed screens (desktop → intro → title → game).
+ * The game is one canvas (scene + board + effects) under a DOM HUD that lets clicks fall through.
+ * Stylesheets load in the order listed in index.html; later files override earlier ones.
+ */
+
+
+/* --- Design tokens --- */
+:root {
+	--w98-teal: #008080;
+	--w98-face: #c0c0c0;
+	--w98-highlight: #ffffff;
+	--w98-light: #dfdfdf;
+	--w98-shadow: #808080;
+	--w98-navy: #000080;
+	--w98-blue: #1084d0;
+	--ink: #e9eef2;
+	--ink-dim: #9aabb6;
+	--gold: #f2c14e;
+	--gold-light: #ffd77a;
+	--red: #ff3d3d;
+	--panel: rgba(7, 13, 19, 0.74);
+	--panel-faint: rgba(7, 13, 19, 0.38);
+	--line: rgba(233, 238, 242, 0.14);
+	--font-ui: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+	--font-numbers: "Teko", "Bahnschrift", "Arial Narrow", sans-serif;
+	--font-epic: "Cinzel", "Trajan Pro", Georgia, serif;
+	--font-w98: Tahoma, "MS Sans Serif", Geneva, Verdana, sans-serif;
+
+	/* Accents shared by several screens */
+	--cyan: #8fd3ff;
+	--parchment-gold: #d9b56a;
+	--gold-text-gradient: linear-gradient(180deg, #fff7e0 0%, #e9c77d 48%, #8a6227 70%, #d9b56a 100%);
+	--medal-gradient: radial-gradient(circle at 35% 30%, #fff3c4, #e2a934 55%, #7a4f10);
+
+	/* Stacking order of the layers that sit above every screen */
+	--layer-letterbox: 30;
+	--layer-banner: 35;
+	--layer-credits: 38;
+	--layer-toasts: 40;
+	--layer-overlays: 50;
+	--layer-fade: 60;
+
+	color-scheme: dark;
 }
-[hidden]{display:none!important}
-html,body{height:100%;overflow:hidden;background:#000}
-body{margin:0;color:var(--ink);font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-.screen{position:fixed;inset:0;overflow:hidden}
-button{font:inherit;color:inherit}
-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid rgba(233,238,242,.55);border-radius:3px;background:rgba(233,238,242,.08);font:600 .92em/1.5 var(--f-ui);text-align:center;color:var(--ink)}
-:focus-visible{outline:2px solid var(--gold-hi);outline-offset:2px}
+
+
+/* --- Page basics --- */
+[hidden] {
+	display: none !important;
+}
+
+html,
+body {
+	height: 100%;
+	overflow: hidden;
+	background: #000;
+}
+
+body {
+	margin: 0;
+	color: var(--ink);
+	font-family: var(--font-ui);
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.screen {
+	position: fixed;
+	inset: 0;
+	overflow: hidden;
+}
+
+button {
+	font: inherit;
+	color: inherit;
+}
+
+kbd {
+	display: inline-block;
+	min-width: 1.6em;
+	padding: 0 0.4em;
+	border: 1px solid rgba(233, 238, 242, 0.55);
+	border-radius: 3px;
+	background: rgba(233, 238, 242, 0.08);
+	font: 600 0.92em/1.5 var(--font-ui);
+	text-align: center;
+	color: var(--ink);
+}
+
+:focus-visible {
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}

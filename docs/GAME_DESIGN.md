@@ -107,7 +107,7 @@ Snapshots of the single-file source at each milestone are in `reference/history/
   - It also appears on the compass and minimap and leaves a dotted trail.
   - Following it counts "objectives complete". Ignoring it unlocks *Independent Thinker*.
   - The *Bigger Marker* perk makes it 50 % larger.
-- **Health and damage:**
+- **Health and damage** (every number here is in `TUNING`, `js/data/tuning.js`):
   - A mine deals 60 HP (45 with *Thick Skin*).
   - Health regenerates at 24 HP/s after 3 s without damage (1.5 s with *Second Wind*).
   - Below 40 HP: heartbeat, desaturated screen and a "Health critical" warning.
@@ -128,7 +128,7 @@ Snapshots of the single-file source at each milestone are in `reference/history/
 - **Lore fragments:** 3–6 hidden under safe tiles per field (collected when revealed).
   - The counter says "x/400", but there are 13 actual texts, which cycle.
   - Each one is a toast, gives +50 XP and is voiced by Jenkins or Reyes.
-- **Achievements:** 27 in total, each with Gamerscore (`ACH` in `js/data/content.js`). Examples: First Click, Area Denial (20+ tiles at once), Paying Respects (press F), Patience Is a Virtue (do nothing for 20 s), Credits Enjoyer, Ungrateful (skip the credits, 0 G), Dry Run and Breathtaking (Pathos-4).
+- **Achievements:** 27 in total, each with Gamerscore (`ACHIEVEMENTS` in `js/data/achievements.js`). Examples: First Click, Area Denial (20+ tiles at once), Paying Respects (press F), Patience Is a Virtue (do nothing for 20 s), Credits Enjoyer, Ungrateful (skip the credits, 0 G), Dry Run and Breathtaking (Pathos-4).
 - **Side quests:** the radio adds them to the quest log. Neural Interface Upgrade (Kova), Get Yo Ass In Da Club (Dez), Call Your Mother, Premium Flag Collector, Whispers in the Field, Ice Core Samples ("Not implemented"), Dinner Is Ready, Rate Your Stay (HALCYON). Each one has a fake compass bearing and distance.
 - **Kill feed and combos:**
   - The right-side feed logs every action ("SWEEPER ▸ REVEALED H10 ×146 +1460").

@@ -1,22 +1,114 @@
-// ui/hud.js — DOM HUD updates (quest list, XP, health, mines counter, prompts).
-import {ST} from '../core/shared.js';
-import {CHAR} from '../data/dialogue.js';
-import {RANKS,SIDE,SKINS} from '../data/content.js';
-import {$,esc} from '../core/util.js';
-import {PROFILE,settings} from '../core/storage.js';
-import {need} from '../game/rules.js';
+/**
+ * hud.js: the DOM part of the in-game HUD: counters, XP and season bars, quest objectives, health and timer.
+ * (The canvas parts, compass, minimap and radio waveform, are in render/hud/.)
+ */
+import {EscapeHtml, FindElement} from '../core/dom.js';
+import {profile} from '../core/player-profile.js';
+import {settings} from '../core/settings.js';
+import {FormatMinutesSeconds} from '../core/time.js';
+import {CHARACTERS} from '../data/characters.js';
+import {SIDE_QUESTS} from '../data/side-quests.js';
+import {FLAG_SKINS} from '../data/store.js';
+import {RankTitle} from '../data/texts.js';
+import {game} from '../game/game.js';
+import {input} from '../game/input/input-controller.js';
+import {progression} from '../game/progression.js';
 
-/* ================= HUD ================= */
-export function updateHUD(){if(!ST.G)return;
-  $('#minesleft').textContent=ST.G.mines-ST.G.flags-ST.G.booms;$('#minestotal').textContent=ST.G.mines;$('#flagsn').textContent=ST.G.flags;$('#coins').textContent=PROFILE.coins.toLocaleString('en-US');
-  $('#lvl').textContent=PROFILE.lvl;$('#rank').textContent=RANKS[Math.min(RANKS.length-1,PROFILE.lvl-1)]+' · RANK '+PROFILE.lvl;$('#xpbar').style.width=(PROFILE.xp/need(PROFILE.lvl)*100)+'%';$('#xptxt').textContent=`${PROFILE.xp} / ${need(PROFILE.lvl)} XP`;
-  const sk=$('#skillnag');sk.hidden=PROFILE.skill<1;sk.textContent=`${PROFILE.skill} UNSPENT SKILL POINT${PROFILE.skill>1?'S':''}`;
-  $('#tier').textContent=1+Math.floor((PROFILE.lvl-1)/2);$('#sbar').style.width=((PROFILE.lvl-1)%2*50+PROFILE.xp/need(PROFILE.lvl)*50)+'%';
-  $('#boost').hidden=!(PROFILE.boostUntil>Date.now());$('#equip').textContent=PROFILE.skin==='red'?'STANDARD-ISSUE FINGER':(SKINS[PROFILE.skin].name+' · PREMIUM').toUpperCase();
-  const safe=ST.G.n-ST.G.mines,o=[[`Reveal the safe tiles`,`${ST.G.opened}/${safe}`,ST.G.won],[`Flag the mines (optional)`,`${ST.G.flags}/${ST.G.mines}`,ST.G.won],[`Follow the quest marker`,`${ST.G.follows}`,ST.G.follows>=10],[`Survive`,ST.G.deaths?`${ST.G.deaths} ✝`:'',ST.G.won],[`Find lore fragments`,`${ST.G.loreFound}/400`,false]];
-  if(ST.G.theme.bg==='pathos')o.splice(1,0,[ST.G.flooded?'Hold your breath (indefinitely)':'Clear the base before it floods','',ST.G.won&&!ST.G.flooded]);
-  $('#q-obj').innerHTML=o.map(([n,v,d])=>`<li class="${d?'done':''}"><i></i><span>${esc(n)}</span><b>${esc(v)}</b></li>`).join('');
-  const qs=$('#q-side');if(ST.G.tracked){const q=SIDE[ST.G.tracked];qs.hidden=false;qs.innerHTML=`<span class="qs-n" style="color:${CHAR[q.who].color}">◆ ${esc(q.name)}</span><span class="qs-o">${esc(q.obj())}</span>`;}else qs.hidden=true;
-  $('#b-mute').textContent=settings.muted?'SOUND OFF':'SOUND ON';$('#flagmode').textContent=ST.flagMode?'FLAG MODE: ON':'FLAG MODE: OFF';$('#flagmode').classList.toggle('on',ST.flagMode);
+
+const ADVERTISED_LORE_FRAGMENTS = 400;
+const LEVELS_PER_SEASON_TIER = 2;
+
+
+/**
+ * Refresh() rewrites everything that changes on game events (counters, XP, objectives, buttons); the game calls it
+ * after each event. UpdateFrame() only does the health bar and the mission timer, which change every frame.
+ */
+export class Hud {
+	/** Rewrites the HUD after something happened. Does nothing outside a game. */
+	Refresh() {
+		const field = game.field;
+		if (!field) {
+			return;
+		}
+		FindElement('#mines-left').textContent = String(field.mineCount - field.flagCount - field.mineHits);
+		FindElement('#mines-total').textContent = String(field.mineCount);
+		FindElement('#flag-count').textContent = String(field.flagCount);
+		FindElement('#coin-count').textContent = profile.coins.toLocaleString('en-US');
+		this.#RefreshProgression();
+		FindElement('#xp-boost').hidden = !(profile.xpBoostUntil > Date.now());
+		const skinName = profile.equippedSkin === 'red'
+			? 'STANDARD-ISSUE FINGER'
+			: (FLAG_SKINS[profile.equippedSkin].name + ' · PREMIUM').toUpperCase();
+		FindElement('#equipped-item').textContent = skinName;
+		FindElement('#quest-objectives').innerHTML = this.#ObjectivesMarkup(field);
+		this.#RefreshSideQuest(field);
+		FindElement('#mute-button').textContent = settings.muted ? 'SOUND OFF' : 'SOUND ON';
+		const flagModeButton = FindElement('#flag-mode-button');
+		flagModeButton.textContent = input.flagMode ? 'FLAG MODE: ON' : 'FLAG MODE: OFF';
+		flagModeButton.classList.toggle('is-active', input.flagMode);
+	}
+
+
+	/** The health bar (with its trailing damage bar) and the mission timer. */
+	UpdateFrame() {
+		const field = game.field;
+		const health = Math.max(0, field.health);
+		FindElement('#health-fill').style.width = health + '%';
+		FindElement('#health-trail').style.width = Math.max(health, field.healthTrail) + '%';
+		FindElement('#health-value').textContent = String(Math.ceil(health));
+		FindElement('#mission-timer').textContent = FormatMinutesSeconds(field.missionSeconds);
+	}
+
+
+	/** Level, rank, XP bar, unspent skill points, and the battle-pass season tier (a new one every two levels). */
+	#RefreshProgression() {
+		const level = profile.level;
+		const levelProgress = profile.xp / progression.XPForLevel(level);
+		FindElement('#level-badge').textContent = String(level);
+		FindElement('#player-rank').textContent = RankTitle(level) + ' · RANK ' + level;
+		FindElement('#xp-bar-fill').style.width = (levelProgress * 100) + '%';
+		FindElement('#xp-text').textContent = `${profile.xp} / ${progression.XPForLevel(level)} XP`;
+		const skillNag = FindElement('#skill-nag');
+		skillNag.hidden = profile.skillPoints < 1;
+		skillNag.textContent = `${profile.skillPoints} UNSPENT SKILL POINT${profile.skillPoints > 1 ? 'S' : ''}`;
+		FindElement('#season-tier').textContent = String(1 + Math.floor((level - 1) / LEVELS_PER_SEASON_TIER));
+		FindElement('#season-bar-fill').style.width = ((level - 1) % 2 * 50 + levelProgress * 50) + '%';
+	}
+
+
+	/** The main quest's objectives as list items: [label, progress, done]. Pathos-4 adds one about the flood. */
+	#ObjectivesMarkup(field) {
+		const safeTiles = field.tileCount - field.mineCount;
+		const objectives = [
+			['Reveal the safe tiles', `${field.openedCount}/${safeTiles}`, field.isWon],
+			['Flag the mines (optional)', `${field.flagCount}/${field.mineCount}`, field.isWon],
+			['Follow the quest marker', `${field.markersFollowed}`, field.markersFollowed >= 10],
+			['Survive', field.deaths ? `${field.deaths} ✝` : '', field.isWon],
+			['Find lore fragments', `${field.loreFoundHere}/${ADVERTISED_LORE_FRAGMENTS}`, false],
+		];
+		if (field.chapter.floods) {
+			const label = field.isFlooded ? 'Hold your breath (indefinitely)' : 'Clear the base before it floods';
+			objectives.splice(1, 0, [label, '', field.isWon && !field.isFlooded]);
+		}
+		return objectives.map(([label, progress, isDone]) =>
+			`<li class="${isDone ? 'is-done' : ''}"><i></i><span>${EscapeHtml(label)}</span><b>${EscapeHtml(progress)}</b></li>`,
+		).join('');
+	}
+
+
+	/** The tracked side quest under the main quest, in its giver's colour. */
+	#RefreshSideQuest(field) {
+		const element = FindElement('#side-quest');
+		if (!field.trackedSideQuest) {
+			element.hidden = true;
+			return;
+		}
+		const quest = SIDE_QUESTS[field.trackedSideQuest];
+		element.hidden = false;
+		element.innerHTML = `<span class="side-quest-name" style="color:${CHARACTERS[quest.speaker].color}">◆ ${EscapeHtml(quest.name)}</span>`
+			+ `<span class="side-quest-objective">${EscapeHtml(quest.Objective(field))}</span>`;
+	}
 }
-export function updateHUDframe(){const hp=Math.max(0,ST.G.hp);$('#hpbar').style.width=hp+'%';$('#hptrail').style.width=Math.max(hp,ST.G.hpTrail)+'%';$('#hptxt').textContent=Math.ceil(hp);const t=ST.G.elapsed;$('#timer').textContent=`${String(Math.floor(t/60)).padStart(2,'0')}:${String(Math.floor(t%60)).padStart(2,'0')}`;}
+
+
+export const hud = new Hud();

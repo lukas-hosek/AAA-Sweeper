@@ -1,15 +1,16 @@
 # Music playback system
 
-The soundtrack has no audio files. It is about 12 KB of JavaScript (`js/audio/instruments.js` and `js/audio/music.js`) that composes and synthesises nine themes live. Each theme is a short loop: four or eight bars of chords and melody data, with variation layered on top by longer phrase counters.
+The soundtrack has no audio files. It is JavaScript (`js/audio/instruments.js`, `js/audio/music-sequencer.js` and one class per theme in `js/audio/themes/`) that composes and synthesises nine themes live. Each theme is a short loop: four or eight bars of chords and melody data, with variation layered on top by longer phrase counters.
 
 ## 1. The scheduler
 
+`MusicSequencer` (the `music` singleton) owns one instance of every theme:
+
 ```js
-const MUS = {mode:'none', step:0, next:0, timer:null};
-musicStart(mode)  // switch theme: step = 0, next = now + 80 ms; starts a 40 ms setInterval once
-musicStop()       // mode = 'none'
-musicTick()       // every 40 ms: schedule every step whose time falls in the next 300 ms
-musicStep(mode, s, t)  // play step s of a theme at AudioContext time t
+music.Start(themeName)   // switch theme: step 0 starts 80 ms from now; starts a 40 ms setInterval on first use
+music.Stop()             // silence
+#Tick()                  // every 40 ms: schedule every step whose time falls in the next 300 ms
+theme.PlayStep(step, time)   // a MusicTheme subclass plays step `step` at AudioContext time `time`
 ```
 
 This is the standard "two clocks" look-ahead pattern:
@@ -24,8 +25,8 @@ This is the standard "two clocks" look-ahead pattern:
 
 | Situation | Theme |
 |---|---|
-| Title screen (`toTitle`) | `title` |
-| Starting a chapter (`fieldMusic()` → `FIELDS[i].mus`) | `game`, `desert`, `club`, `arctic`, `pathos`, `home` |
+| Title screen (`titleScene.Show`) | `title` |
+| Starting a chapter (`chapter.musicTheme`) | `game`, `desert`, `club`, `arctic`, `pathos`, `home` |
 | The club arrives in another chapter | `club` for 24 s, then back to the chapter's theme |
 | Field cleared | `win` |
 | Credits | `credits` |
@@ -33,23 +34,26 @@ This is the standard "two clocks" look-ahead pattern:
 
 ## 2. Data formats
 
-```js
-STEP[mode]   // seconds per sequencer step = 60 / BPM / subdivision
-PROG[mode]   // chord per bar: [MIDI root, quality], quality 'M' | 'm' | 'maj7' | 'm7' | '7'
-triad(root, q)          // -> [root, third, fifth]
-CH7[q]                  // seventh-chord intervals for 'maj7' | 'm7' | '7'
-n2f(midi)               // MIDI note -> Hz (A4 = 69 = 440 Hz)
-```
-
-Melodies are arrays of MIDI notes per bar, one entry per step, with `0` meaning a rest:
+Every theme is a `MusicTheme` subclass (`themes/music-theme.js`). The base class holds:
 
 ```js
-const PMEL = [[77,0,0,76,72,0,0,0], [74,0,71,0,74,76,0,0], [76,0,72,0,69,0,0,71], [74,0,0,0,0,0,0,0]]; // Pathos-4 flute
-const HIJAZ = [...16-step bars...];  // Dune Sea oud line in D Hijaz (D Eb F# G A Bb C)
-const ARCPAT = [[0,-1,2,-1,...], [...]]; // Nord-7 bells: indices into the current triad, -1 = rest, >= 3 = an octave up
+name             // theme id for music.Start(): 'title', 'game', 'club'...
+stepSeconds      // seconds per sequencer step = 60 / BPM / steps per beat (set by the constructor)
+PlayStep(step, time)                 // overridden by every theme
+MusicTheme.Triad(rootNote, quality)  // -> [root, third, fifth]; quality 'M' or 'm'
+CHORD_INTERVALS[quality]             // seventh chords: 'maj7' | 'm7' | '7'
+MidiToFrequency(midiNote)            // core/math.js: MIDI note -> Hz (A4 = 69 = 440 Hz)
 ```
 
-Inside `musicStep` each theme derives its position from the step counter `s`: `bar = floor(s/8) % 4`, `st = s % 8`, and longer counters such as `floor(s/32)` (phrase) or `floor(s/64)` (cycle). It then decides what to play on this step.
+Each theme file starts with its data: `PROGRESSION` (one `[MIDI root, quality]` chord per bar) and melody tables, arrays of MIDI notes per bar with one entry per step and `0` meaning a rest:
+
+```js
+const FLUTE_MELODY = [[77, 0, 0, 76, 72, 0, 0, 0], [74, 0, 71, 0, 74, 76, 0, 0], ...];   // Pathos-4 flute
+const HIJAZ_MELODY = [...16-step bars...];      // Dune Sea oud line in D Hijaz (D Eb F# G A Bb C)
+const BELL_PATTERNS = [[0, -1, 2, -1, ...], [...]];   // Nord-7 bells: indices into the triad, -1 = rest, >= 3 = an octave up
+```
+
+Inside `PlayStep` each theme derives its position from the step counter: `bar = floor(step / 8) % 4`, `stepInBar = step % 8`, and longer counters such as `floor(step / 32)` (phrase) or `floor(step / 64)` (cycle). It then decides what to play on this step.
 
 ## 3. The themes
 
@@ -79,7 +83,7 @@ Inside `musicStep` each theme derives its position from the step counter `s`: `b
   - **Braam** (the "trailer horn": stacked saw and square, distorted, with a resonant filter swell) on bar 1 of every other 4-bar cycle.
 - **desert:**
   - **Drones:** low-passed sawtooth on D2 and A2.
-  - **Oud melody:** the `HIJAZ` table (4 bars × 16 steps). The oud is a plucked triangle with a 1.4 % pitch drop on the attack plus a short filtered saw.
+  - **Oud melody:** the `HIJAZ_MELODY` table (4 bars × 16 steps). The oud is a plucked triangle with a 1.4 % pitch drop on the attack plus a short filtered saw.
   - **Darbuka:** *doum* (sine 105 → 58 Hz) on steps 0 and 8; *tek* (band-passed noise at 3.4 kHz) on 2, 6 and 12; ghost teks on 14 and 15.
   - **Alternating cycles:** a braam on one 64-step cycle, a ney (breathy sine, vibrato, falling a whole tone) on the next.
 - **club:**
@@ -89,17 +93,17 @@ Inside `musicStep` each theme derives its position from the step counter `s`: `b
   - **8-bar build:** a square-wave arpeggio enters in bars 5–8 and a noise riser (300 Hz → 6 kHz) sweeps through bar 8 into the next loop.
 - **arctic:**
   - **Each bar:** a soft pad (sine plus slightly detuned triangle with slow attack), a sub sine and wind (band-passed noise sweeping 450 → 1500 Hz).
-  - **Bells:** inharmonic partials at 1, 2.76 and 5.4 × f. They play two alternating 32-step patterns (`ARCPAT`) through the triad, three octaves up.
+  - **Bells:** inharmonic partials at 1, 2.76 and 5.4 × f. They play two alternating 32-step patterns (`BELL_PATTERNS`) through the triad, three octaves up.
   - **Accents:** a distant taiko every other phrase; a high accent bell in bar 4.
 - **pathos:** see §4.
 - **home:**
   - **Swing:** a lazy backyard shuffle; every odd step is delayed by 22 % of a step.
   - **Rhythm section:** soft kick on 1 and 3, triangle bass walking root–fifth–octave–fifth, a 6 kHz noise shaker on every step.
   - **Keys:** e-piano seventh chords on steps 2 and 6.
-  - **Melody:** a whistled tune (`HOMEMEL`, sine that scoops up into each note, with vibrato) on alternate 4-bar phrases.
+  - **Melody:** a whistled tune (`WHISTLE_MELODY`, sine that scoops up into each note, with vibrato) on alternate 4-bar phrases.
 - **win:** pad, sub and taiko each bar, and a triangle arpeggio three octaves up on every step. It loops until you leave the results screen.
 - **credits:** built in three 64-step passes.
-  - **Pass 1:** piano melody (`CRMEL`, 8 bars) over pad and sub.
+  - **Pass 1:** piano melody (`MELODY`, 8 bars) over pad and sub.
   - **Pass 2:** adds taiko and a piano arpeggio.
   - **Pass 3:** adds big taikos, braams on bars 1 and 5, and a soft saw doubling the melody an octave below.
 
@@ -111,13 +115,13 @@ The brief asked for pan flutes, ocarinas, heavy reverb, Lydian mode and a slow t
   - The progression is F – G – Am – G over an F tonic. The G major chord puts **B natural (the raised 4th)** against F, the defining Lydian colour.
   - In bar 1 the pad also adds MIDI `r + 18` (B3) to the F chord itself, so the ♯4 sounds right away.
 - **Tempo:** 62 BPM in eighths, so one 4-bar phrase lasts 15.5 s.
-- **Space:** a dedicated 6.5 s reverb (`A.revL`, send 0.85). The sub sine (1.5 s attack) and every melodic voice feed it.
+- **Space:** a dedicated 6.5 s reverb (`longReverb`, send 0.85). The sub sine (1.5 s attack) and every melodic voice feed it.
 - **Harp:** a triangle with an octave sine, arpeggiating `[0,1,2,3,2,1,0,1]` through the chord two and three octaves up on every step. This is the steady "water" motion.
 - **Pan flute:** sine plus 25 % triangle, 0.18 s attack.
   - **Breath:** a band-passed noise layer at 1.5 × f gives the breathiness.
   - **Vibrato:** delayed, 4.8 Hz, fading in over the first 60 % of the note, up to ±1.2 %.
-  - **Phrasing:** plays `PMEL` on even phrases. Notes before a rest are held 2.6 steps, others 1.6.
-- **Ocarina:** an almost pure sine with a faint 3rd harmonic, 5.6 Hz vibrato and a quicker attack. It answers on odd phrases (`OMEL`, an octave up).
+  - **Phrasing:** plays `FLUTE_MELODY` on even phrases. Notes before a rest are held 2.6 steps, others 1.6.
+- **Ocarina:** an almost pure sine with a faint 3rd harmonic, 5.6 Hz vibrato and a quicker attack. It answers on odd phrases (`OCARINA_MELODY`, an octave up).
 - **Water:** a slow low-passed noise swell (380 Hz, 6-step attack) every second bar.
 - **Whale call:** every 4th phrase, a sine glides 230 → 150 → 270 Hz straight into the long reverb.
 - **Under water:** after the flood the whole mix, music included, goes through the master low-pass at 1.2 kHz (see AUDIO.md).
@@ -127,20 +131,20 @@ The brief asked for pan flutes, ocarinas, heavy reverb, Lydian mode and a slow t
 
 | Instrument | Recipe | Used by |
 |---|---|---|
-| `taiko(t, vol, dest)` | Sine 115 → 46 Hz glide plus low-passed noise, into the medium reverb | title, game, arctic, win, credits, intro |
-| `pad(notes, t, dur, vol)` | Two sawtooths per note detuned ±9 cents, 760 Hz low-pass, 0.6 s attack | title, game, win, credits |
-| `softpad(notes, t, dur, vol)` | Sine plus triangle (+0.3 %), attack 40 % of the note | arctic, pathos |
-| `pluck(f, t, vol)` | 90 ms saw, low-pass sweep 2600 → 380 Hz, Q 3 | game |
-| `braam(root, t, vol)` | Saw and square on root−24, −12, 0, +7, random detune, resonant LP 110 → 1700 → 260 Hz, `tanh(5x)` | title, game, desert, credits |
-| `kick`, `clap`, `hat`, `stab` | See club above | club |
-| `oud`, `doum`, `tek`, `ney` | See desert above | desert |
-| `bell(f, t, vol)` | Sines at 1, 2.76, 5.4 × f, decays 0.7 / 0.25 / 0.12 s | arctic |
-| `flute`, `ocarina`, `harp` | See §4 | pathos |
-| `epiano(f, t, vol)` | Sine plus octave plus a slightly detuned triangle | home |
-| `whistle(f, t, dur, vol)` | Sine scooping up 3 % in 60 ms, 5.5 Hz vibrato | home |
-| `piano(f, t, vol)` | Triangle (0.55 s release) plus octave sine | credits |
+| `Taiko(time, volume, destination)` | Sine 115 → 46 Hz glide plus low-passed noise, into the medium reverb | title, game, arctic, win, credits, intro |
+| `Pad(notes, time, duration, volume)` | Two sawtooths per note detuned ±9 cents, 760 Hz low-pass, 0.6 s attack | title, game, win, credits |
+| `SoftPad(notes, time, duration, volume)` | Sine plus triangle (+0.3 %), attack 40 % of the note | arctic, pathos |
+| `Pluck(frequency, time, volume)` | 90 ms saw, low-pass sweep 2600 → 380 Hz, Q 3 | game |
+| `Braam(rootNote, time, volume)` | Saw and square on root−24, −12, 0, +7, random detune, resonant LP 110 → 1700 → 260 Hz, `tanh(5x)` | title, game, desert, credits |
+| `Kick`, `Clap`, `HiHat`, `Stab` | See club above | club |
+| `Oud`, `Doum`, `Tek`, `Ney` | See desert above | desert |
+| `Bell(frequency, time, volume)` | Sines at 1, 2.76, 5.4 × f, decays 0.7 / 0.25 / 0.12 s | arctic |
+| `Flute`, `Ocarina`, `Harp` | See §4 | pathos |
+| `ElectricPiano(frequency, time, volume)` | Sine plus octave plus a slightly detuned triangle | home |
+| `Whistle(frequency, time, duration, volume)` | Sine scooping up 3 % in 60 ms, 5.5 Hz vibrato | home |
+| `Piano(frequency, time, volume)` | Triangle (0.55 s release) plus octave sine | credits |
 
-All instruments write to `A.duck` (the music bus) plus a reverb send, so radio ducking, pause dimming and the underwater muffle apply to them automatically.
+All instruments write to `audioEngine.duckBus` (the music bus) plus a reverb send, so radio ducking, pause dimming and the underwater muffle apply to them automatically.
 
 ## 6. Exporting the soundtrack
 
@@ -152,9 +156,9 @@ scripts/export_ost.sh pathos club     # selected themes only
 Everything goes to `out/ost/`, which is not committed. The script runs three tools in order:
 
 - **`tools/ost/make_cover.py`:** the album cover `out/ost/cover.jpg`, a square shot of the title screen.
-- **`tools/ost/render_ost.py`:** opens the game headless with `?debug` and calls `window.__render(theme, steps, 10)`.
-  - That function (in `js/debug.js`) swaps `A.ctx` for an `OfflineAudioContext` and rebuilds the music bus and reverbs on it.
-  - It calls `musicStep()` for every step up front, renders faster than real time and peak-normalises to −1 dBFS.
+- **`tools/ost/render_ost.py`:** opens the game headless with `?debug` and calls `musicExporter.Render(theme, steps, 10)`.
+  - That method (in `js/debug.js`) calls `audioEngine.BeginOfflineRender`, which rebuilds the audio graph inside an `OfflineAudioContext`.
+  - It calls the theme's `PlayStep()` for every step up front, renders faster than real time and peak-normalises to −1 dBFS.
   - It writes a 24-bit / 48 kHz WAV to `out/ost/wav/`.
   - Each track repeats its full variation cycle (table above) until it is at least 100 s long, then fades out over 10 s.
 - **`tools/ost/encode_ost.py`:**
@@ -164,12 +168,13 @@ Everything goes to `out/ost/`, which is not committed. The script runs three too
 
 ## 7. Adding a theme
 
-1. Pick a tempo: add `STEP.mytheme = 60 / BPM / subdivision` in `js/audio/music.js`.
-2. Add data: `PROG.mytheme` (one chord per bar) and any melody arrays.
-3. Add an `else if (mode === 'mytheme') { ... }` branch to `musicStep(mode, s, t)`. Derive `bar`/`st` from `s`, play instruments at time `t`, and send to `A.duck` (and `A.sendM` or `A.sendL` for reverb). Keep any randomness inside the step.
-4. Use it: set `mus: 'mytheme'` on a chapter in `js/data/fields.js`, or call `musicStart('mytheme')`.
-5. Add its cycle length to `CYCLE` in `tools/ost/render_ost.py` and a title to `TRACKS` in `tools/ost/encode_ost.py`.
-6. Listen in the browser (`scripts/startup.sh`, open http://localhost:8080, then use the chapter select). Claude can't hear it, but it can render it with `.venv/bin/python tools/ost/render_ost.py mytheme` and check loudness and a spectrogram.
+1. Write `js/audio/themes/my-theme.js`: a `MyTheme extends MusicTheme` class whose constructor calls `super('mytheme', beatsPerMinute, stepsPerBeat)`.
+2. Put its data at the top of the file: `PROGRESSION` (one chord per bar) and any melody tables.
+3. Override `PlayStep(step, time)`: derive the bar and the step in the bar from `step`, play instruments at `time`, and send to `audioEngine.duckBus` (and `musicReverbSend` or `longReverbSend` for reverb). Keep any randomness inside the step.
+4. Register it: add `new MyTheme()` to the list in `MusicSequencer`'s constructor (`js/audio/music-sequencer.js`).
+5. Use it: set `musicTheme: 'mytheme'` on a chapter in `js/game/chapters.js`, or call `music.Start('mytheme')`.
+6. Add its cycle length to `CYCLE` in `tools/ost/render_ost.py` and a title to `TRACKS` in `tools/ost/encode_ost.py`.
+7. Listen in the browser (`scripts/startup.sh`, open http://localhost:8080, then use the chapter select). Claude can't hear it, but it can render it with `.venv/bin/python tools/ost/render_ost.py mytheme` and check loudness and a spectrogram.
 
 **Tips:**
 - Keep each step light. The club schedules about 15 nodes per 16th note, which is comfortable.

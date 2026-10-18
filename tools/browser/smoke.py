@@ -24,71 +24,121 @@ def check(ok, msg):
     print(('  ok   ' if ok else '  FAIL ') + msg, flush=True)
     if not ok: failures.append(msg)
 
-with serve_game(A.get('url')) as url, sync_playwright() as p:
+with serve_game(A.get('url'), snapshot=True) as url, sync_playwright() as p:
     browser = launch(p)
     page = new_page(browser, mobile=MOBILE)
     shot = lambda name: page.screenshot(path=os.path.join(OUT, name + '.png'))
     tap = page.touchscreen.tap if MOBILE else page.mouse.click
     wait = page.wait_for_timeout
+    status = lambda: t(page, 'testHooks.FieldStatus()')
     try:
         print(f'smoke test · {tag} · {url}', flush=True)
         open_game(page, url)
         wait(500)
-        check(t(page, '__t.screen()') == 'desktop', 'boots to the Win98 desktop')
+        check(t(page, 'testHooks.CurrentScreen()') == 'desktop', 'boots to the Win98 desktop')
         shot('00-desktop')
 
         if A.get('full'):
-            page.click('#aaa-icon')
-            page.wait_for_function("__t.screen() === 'intro'", timeout=15000)
+            page.get_by_role('button', name='Triple A Sweeper').first.click()
+            page.wait_for_function("testHooks.CurrentScreen() === 'intro'", timeout=15000)
             check(True, 'launcher finished, intro started')
             wait(3000); shot('01-intro')
-            page.wait_for_function("__t.screen() === 'title'", timeout=25000)
+            page.wait_for_function("testHooks.CurrentScreen() === 'title'", timeout=25000)
             check(True, 'intro finished, title screen shown')
         else:
-            t(page, '__t.audio()')
-            t(page, '__t.title()')
-            page.wait_for_function("__t.screen() === 'title'", timeout=5000)
+            t(page, 'testHooks.InitAudio()')
+            t(page, 'testHooks.PlayIntro()')
+            wait(1500)
+            page.keyboard.down('Space'); wait(1200); page.keyboard.up('Space')
+            page.wait_for_function("testHooks.CurrentScreen() === 'title'", timeout=5000)
+            check(True, 'holding Space skips the intro')
         wait(1500)
-        check(t(page, '__t.mus()') == 'title', 'title music playing')
+        check(t(page, 'testHooks.CurrentMusicTheme()') == 'title', 'title music playing')
         shot('02-title')
 
-        for c in t(page, '__t.chapters()'):
-            n, bg = c['n'], c['bg']
-            t(page, f"__t.start('normal', {n})")
+        for c in t(page, 'testHooks.Chapters()'):
+            n, scenery = c['number'], c['scenery']
+            t(page, f"testHooks.StartChapter('normal', {n})")
             wait(2400)
-            g = t(page, '({name:__t.G().theme.name, ts:__t.G().tileset, mus:__t.mus(), layout:__t.board().layout})')
-            check(g['name'] == c['name'] and g['mus'] == c['mus'] and g['ts'] == c['ts'],
-                  f"chapter {n} {c['name']}: tileset {g['ts']}, music {g['mus']}, layout {g['layout']}")
-            b = t(page, '__t.board()')
-            cx, cy = b['x'] + b['w'] / 2, b['y'] + b['h'] / 2
+            g = status()
+            music, layout = t(page, 'testHooks.CurrentMusicTheme()'), t(page, 'testHooks.BoardRect().layout')
+            check(g['chapterName'] == c['name'] and music == c['musicTheme'] and g['tilesetName'] == c['tilesetName'],
+                  f"chapter {n} {c['name']}: tileset {g['tilesetName']}, music {music}, layout {layout}")
+            b = t(page, 'testHooks.BoardRect()')
+            cx, cy = b['x'] + b['width'] / 2, b['y'] + b['height'] / 2
             tap(cx, cy); wait(400)
             for _ in range(6):
-                if t(page, '__t.G().dead || __t.G().over'): break
-                tap(cx + (random.random() - .5) * b['w'] * .6, cy + (random.random() - .5) * b['h'] * .6); wait(180)
-            check(t(page, '__t.G().opened') > 0, f'chapter {n}: tiles revealed by clicking')
+                g = status()
+                if g['isDead'] or g['isOver']: break
+                tap(cx + (random.random() - .5) * b['width'] * .6, cy + (random.random() - .5) * b['height'] * .6); wait(180)
+            check(status()['openedCount'] > 0, f'chapter {n}: tiles revealed by clicking')
             wait(2500)
-            shot(f'1{n}-{bg}')
+            shot(f'1{n}-{scenery}')
             if n == 1:
-                nv = t(page, '__t.voicesLoaded()')
+                nv = t(page, 'testHooks.DecodedVoiceCount()')
                 check(nv >= 5, f'voice lines load and decode ({nv} cached)')
-                t(page, '(__t.G().hp = 100, __t.boom())'); wait(1300)
-                check(t(page, '__t.G().booms') > 0, 'stepping on a mine damages the player')
-                shot(f'1{n}-{bg}-blood')
-            if bg == 'pathos':
-                t(page, '__t.floodIn(1)'); wait(4500)
-                check(t(page, '__t.G().flooded'), 'Pathos-4 floods when the timer runs out')
-                t(page, '__t.breath(-11.47)'); wait(600)
-                o2 = ' '.join(page.locator('#o2').inner_text().split())
+                t(page, '(testHooks.SetHitPoints(100), testHooks.StepOnMine())'); wait(1300)
+                check(status()['mineHits'] > 0, 'stepping on a mine damages the player')
+                shot(f'1{n}-{scenery}-blood')
+            if scenery == 'pathos':
+                t(page, 'testHooks.FloodIn(1)'); wait(4500)
+                check(status()['isFlooded'], 'Pathos-4 floods when the timer runs out')
+                t(page, 'testHooks.SetBreath(-11.47)'); wait(600)
+                o2 = ' '.join(page.locator('#oxygen-readout').inner_text().split())
                 check('BREATH' in o2, 'breath readout shows: ' + o2)
-                shot(f'1{n}-{bg}-flooded')
+                shot(f'1{n}-{scenery}-flooded')
 
-        t(page, '__t.credits()')
+        # Systems around the board, on a fresh chapter 1
+        t(page, "testHooks.StartChapter('normal', 1)")
+        wait(2400)
+        if not MOBILE:
+            page.keyboard.press('ArrowRight'); page.keyboard.press('x'); wait(200)
+            check(status()['flagCount'] == 1, 'keyboard: X flags the tile under the cursor')
+            page.keyboard.press('x'); page.keyboard.press('Space'); wait(400)
+            check(status()['flagCount'] == 0 and status()['openedCount'] > 0, 'keyboard: X unflags, Space reveals')
+        else:
+            b = t(page, 'testHooks.BoardRect()')
+            tap(b['x'] + b['width'] / 2, b['y'] + b['height'] / 2); wait(400)
+
+        t(page, 'testHooks.OpenPauseMenu()'); wait(300)
+        check(status()['isPaused'] and t(page, 'testHooks.VisibleOverlays()') == ['pause'], 'pause menu pauses the game')
+        shot('30-pause')
+        t(page, 'testHooks.ResumeGame()'); wait(300)
+        check(not status()['isPaused'] and t(page, 'testHooks.VisibleOverlays()') == [], 'resume unpauses')
+
+        for tab in ['quests', 'skills', 'store', 'achievements', 'settings']:
+            t(page, f"testHooks.OpenPanel('{tab}')"); wait(300)
+            check(t(page, 'testHooks.VisibleOverlays()') == ['panel'], f'panel tab {tab} opens')
+            shot(f'31-panel-{tab}')
+            if tab == 'store':
+                coins = t(page, 'testHooks.ProfileStatus().coins')
+                t(page, "testHooks.BuyStoreItem('coins')"); wait(200)
+                t(page, "testHooks.BuyStoreItem('gold')"); wait(200)
+                profile = t(page, 'testHooks.ProfileStatus()')
+                check(profile['coins'] == coins + 1000 - 300 and profile['equippedSkin'] == 'gold',
+                      f"store: coin bundle and golden flag bought ({coins} → {profile['coins']} coins)")
+            t(page, 'testHooks.ClosePanel()'); wait(300)
+        check(not status()['isPaused'], 'closing the panel resumes the game')
+
+        t(page, '(testHooks.SetHitPoints(1), testHooks.StepOnMine())'); wait(1500)
+        check(status()['isDead'] and t(page, 'testHooks.VisibleOverlays()') == ['death'], 'dying shows the death screen')
+        shot('32-death')
+        page.wait_for_function('!testHooks.FieldStatus().isDead', timeout=12000)
+        check(status()['hitPoints'] == 100 and t(page, 'testHooks.VisibleOverlays()') == [], 'checkpoint restores the player')
+
+        t(page, 'testHooks.RevealAllSafeTiles()'); wait(500)
+        check(status()['isWon'], 'revealing every safe tile wins the chapter')
+        page.wait_for_function("testHooks.VisibleOverlays().includes('results')", timeout=12000)
+        check(True, 'results screen shown')
+        shot('33-results')
+
+        t(page, 'testHooks.RollCredits()')
         wait(4000); shot('20-credits-cards')
-        page.wait_for_function('__t.cr().n > 0', timeout=40000)
+        page.wait_for_function('testHooks.CreditsStatus().positionCount > 0', timeout=40000)
         wait(5000)
-        cr = t(page, '__t.cr()')
-        check(cr['on'] and cr['n'] == 1412, f"credits rolling: {cr['n']} positions credited (expected 1,412)")
-        check(t(page, '__t.mus()') == 'credits', 'credits music playing')
+        cr = t(page, 'testHooks.CreditsStatus()')
+        check(cr['isRolling'] and cr['positionCount'] == 1412, f"credits rolling: {cr['positionCount']} positions credited (expected 1,412)")
+        check(t(page, 'testHooks.CurrentMusicTheme()') == 'credits', 'credits music playing')
         shot('21-credits-roll')
     except Exception as e:
         failures.append(f'EXCEPTION {e}')

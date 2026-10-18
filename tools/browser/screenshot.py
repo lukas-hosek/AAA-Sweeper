@@ -39,22 +39,23 @@ with serve_game(A.get('url')) as url, sync_playwright() as p:
     wait = page.wait_for_timeout
     try:
         open_game(page, url)
-        t(page, '__t.audio()')
-        if screen == 'title': t(page, '__t.title()'); wait(2500)
-        if screen == 'credits': t(page, '__t.credits()'); wait(2000)
+        t(page, 'testHooks.InitAudio()')
+        if screen == 'title': t(page, 'testHooks.ShowTitle()'); wait(2500)
+        if screen == 'credits': t(page, 'testHooks.RollCredits()'); wait(2000)
         if screen == 'game':
-            t(page, f"__t.start('{A.get('diff', 'normal')}', {int(A.get('chapter', 1))})")
+            t(page, f"testHooks.StartChapter('{A.get('diff', 'normal')}', {int(A.get('chapter', 1))})")
             wait(2400)
-            b = t(page, '__t.board()')
+            b = t(page, 'testHooks.BoardRect()')
             for k in range(int(A.get('clicks', 1))):
-                if t(page, '__t.G().dead || __t.G().over'): break
-                x = b['x'] + b['w'] / 2 + ((random.random() - .5) * b['w'] * .6 if k else 0)
-                y = b['y'] + b['h'] / 2 + ((random.random() - .5) * b['h'] * .6 if k else 0)
+                status = t(page, 'testHooks.FieldStatus()')
+                if status['isDead'] or status['isOver']: break
+                x = b['x'] + b['width'] / 2 + ((random.random() - .5) * b['width'] * .6 if k else 0)
+                y = b['y'] + b['height'] / 2 + ((random.random() - .5) * b['height'] * .6 if k else 0)
                 (page.touchscreen.tap if mobile else page.mouse.click)(x, y); wait(200)
-            if A.get('boom'): t(page, '(__t.G().hp = 100, __t.boom())'); wait(900)
-            if A.get('flood'): t(page, '__t.floodIn(1)'); wait(4000)
-            if 'breath' in A: t(page, f"__t.breath({float(A['breath'])})"); wait(300)
-            if not mobile: page.mouse.move(b['x'] + b['w'] * .3, b['y'] + b['h'] * .7)
+            if A.get('boom'): t(page, '(testHooks.SetHitPoints(100), testHooks.StepOnMine())'); wait(900)
+            if A.get('flood'): t(page, 'testHooks.FloodIn(1)'); wait(4000)
+            if 'breath' in A: t(page, f"testHooks.SetBreath({float(A['breath'])})"); wait(300)
+            if not mobile: page.mouse.move(b['x'] + b['width'] * .3, b['y'] + b['height'] * .7)
         wait(int(A.get('wait', 1500)))
         page.screenshot(path=out)
         print(os.path.relpath(out))

@@ -8,7 +8,7 @@ tools/tts/generate_voices.py  synthesises lines -> assets/voices/<id>.mp3 and up
 tools/tts/download_models.sh  fetches the model files into tools/tts/models/ (about 120 MB, not committed)
 scripts/bake_voices.sh        runs generate_voices.py with the venv's Python (fetches the model if missing)
 requirements.txt              pinned Python packages (kokoro-onnx, onnxruntime, ...), installed by scripts/setup.sh
-js/data/voice-manifest.js     GENERATED: id -> {d: seconds, w: speaker, t: subtitle}
+js/data/voice-manifest.js     GENERATED: VOICE_LINES[id] = {duration, speaker, subtitle}
 assets/voices/*.mp3           the audio, mono 24 kHz, 32–40 kbps (about 4.6 MB total, committed)
 ```
 
@@ -37,7 +37,7 @@ scripts/bake_voices.sh --say prof "Testing, one two."   # preview -> out/tts/pre
 1. `kokoro.create(text, voice, speed, lang)` returns 24 kHz float audio. `lang` is `en-gb` for voices starting with `b`, `en-us` otherwise.
 2. 0.12 s of silence is appended so the radio squelch doesn't clip the last word.
 3. ffmpeg encodes it to mono 24 kHz MP3: 40 kbps for batch 1 (the original lines), 32 kbps for later batches.
-4. The duration (`d`) goes into the manifest. For batch 2 and later, the speaker (`w`) and subtitle (`t`) go in too.
+4. The `duration` goes into the manifest. For batch 2 and later, the `speaker` and `subtitle` go in too.
 
 ## The cast (`VOICE` in lines.py)
 
@@ -70,9 +70,9 @@ Kokoro v1.0 ships many more voices (American/British, female/male: `af_*`, `am_*
 Event barks have descriptive names: `r_hit3`, `j_low`, `s_ach`, `a_ch5p`.
 
 **Batch 1 is special:** its 50 lines have no speaker or subtitle in the manifest.
-- The speaker comes from the first letter of the id (`PREFIX` in `js/data/dialogue.js`).
-- The subtitle comes from `SUBS` in the same file.
-- If you change a batch-1 line's text, update `SUBS` too.
+- The speaker comes from the first letter of the id (`SPEAKER_BY_ID_PREFIX` in `js/data/characters.js`, read by `SpeakerOf`).
+- The subtitle comes from `BATCH_ONE_SUBTITLES` in `js/data/subtitles.js` (read by `SubtitleOf`).
+- If you change a batch-1 line's text, update its subtitle there too.
 
 ## Writing lines that TTS reads well
 
@@ -87,10 +87,10 @@ Event barks have descriptive names: `r_hit3`, `j_low`, `s_ach`, `a_ch5p`.
 1. **Write it.** Add the tuple to the newest batch in `tools/tts/lines.py` (or start a `BATCH5` and register it in `BATCHES`, with `bitrate: '32k', manifest_text: True`).
 2. **Generate it:** `scripts/bake_voices.sh <id>`. This writes the MP3 and the manifest entry.
 3. **Wire it into the game:**
-   - **Chapter chatter:** append the id to the character's arc in `CHAT.<theme>.arcs` (`js/data/dialogue.js`). Add it to `open` to have it play first.
-   - **Any chapter:** add it to `SHARED` (played after the arcs) or `REPEATS`.
-   - **Event bark:** call `bark('<id>', '<cooldownKey>', seconds)` where the event happens. If it must play instantly, add the id to `PIN` so it stays decoded.
-   - **Quest on a line:** map the id to a side-quest key in `QUEST_ON_LINE`.
+   - **Chapter chatter:** append the id to the character's arc in `CHAPTER_CHATTER.<chapter id>.arcs` (`js/data/chatter.js`). Add it to `openingLines` to have it play first.
+   - **Any chapter:** add it to `SHARED_CHATTER` (played after the arcs) or `REPEATABLE_LINES`.
+   - **Event bark:** call `voices.Bark('<id>', '<cooldownKey>', seconds)` where the event happens. If it must play instantly, add the id to `PINNED_LINES` so it stays decoded.
+   - **Quest on a line:** map the id to a side-quest id in `SIDE_QUEST_AFTER_LINE`.
 4. **Check:** `scripts/bake_voices.sh --check`, `biome lint`, then `scripts/smoke.sh`. Commit the new MP3 together with `lines.py`, the manifest and the code that uses it.
 
 **Removing a line:** delete it from `lines.py`, its MP3 and its manifest row (or regenerate the manifest), and remove every reference in `js/`.

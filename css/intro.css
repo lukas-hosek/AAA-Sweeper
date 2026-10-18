@@ -1,39 +1,308 @@
-/* ---------- Intro ---------- */
-#intro{background:#000;cursor:none;touch-action:none}
-.card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:0;filter:blur(8px);transform:scale(1.04);transition:opacity .8s ease,filter .9s ease,transform 3.2s ease-out;text-align:center;padding:0 24px}
-.card.on{opacity:1;filter:blur(0);transform:scale(1)}
-.legal{position:absolute;left:0;right:0;bottom:calc(30px + env(safe-area-inset-bottom,0px));margin:0;padding:0 24px;font:11px/1.6 var(--f-ui);color:#6f777d;letter-spacing:.03em}
-.ue{width:clamp(90px,16vw,140px);overflow:visible}
-.ue path,.ue polygon{stroke-dasharray:320;stroke-dashoffset:320;transition:stroke-dashoffset 1.6s cubic-bezier(.6,0,.2,1)}
-.card.on .ue path,.card.on .ue polygon{stroke-dashoffset:0}
-.card.on .ue .u2{transition-delay:.25s}.card.on .ue .u1{transition-delay:.45s}
-.ue-word{font:clamp(26px,5.4vw,52px)/1 Michroma,var(--f-ui);letter-spacing:.32em;margin-right:-.32em;color:#f2f5f7}
-.ue-sub{font:400 clamp(11px,1.6vw,15px)/1 Michroma,var(--f-ui);letter-spacing:.7em;margin-right:-.7em;color:#8fa2ad}
-.ue-sub b{color:#8fd3ff;font-weight:400}
-.mh{display:flex;font:clamp(46px,11vw,120px)/1 "Russo One",var(--f-ui);color:#ff8a1f;text-shadow:0 .06em 0 #6b2a00,0 0 40px rgba(255,120,20,.35)}
-.mh span{display:inline-block;transform:translateY(-120vh) rotate(var(--r0));transform-origin:80% 100%}
-.card.on .mh span{animation:mh-drop .95s cubic-bezier(.4,0,.7,1) var(--d) forwards}
-.card.on .mh span.tip{animation:mh-drop .95s cubic-bezier(.4,0,.7,1) var(--d) forwards,mh-tip .55s cubic-bezier(.5,0,.9,.5) calc(var(--d) + 1.25s) forwards}
-@keyframes mh-drop{0%{transform:translateY(-120vh) rotate(var(--r0))}58%{transform:translateY(0) rotate(var(--r1))}70%{transform:translateY(-.22em) rotate(var(--r1))}82%{transform:translateY(0) rotate(var(--r1))}91%{transform:translateY(-.05em) rotate(var(--r1))}100%{transform:translateY(0) rotate(var(--r1))}}
-@keyframes mh-tip{from{transform:rotate(var(--r1))}to{transform:translate(.08em,.04em) rotate(34deg)}}
-.mh-sub{font:600 clamp(12px,2vw,18px)/1 var(--f-ui);letter-spacing:.55em;margin-right:-.55em;color:#d9c4b0}
-.eye{width:clamp(150px,26vw,240px);overflow:visible}
-.eye .lid{transform-box:fill-box;transform-origin:50% 0;transform:scaleY(0)}
-.card.on .eye .lid{animation:blink 2.4s ease-in-out .9s}
-.card.on .eye .iris{animation:look 2.6s ease-in-out .2s}
-@keyframes blink{0%{transform:scaleY(0)}9%{transform:scaleY(1)}17%{transform:scaleY(0)}100%{transform:scaleY(0)}}
-@keyframes look{0%,100%{transform:translateX(0)}30%{transform:translateX(-14px)}65%{transform:translateX(12px)}}
-.bk-word{display:flex;flex-direction:column;align-items:center;gap:6px;font:600 clamp(50px,11vw,110px)/.8 var(--f-num);letter-spacing:.24em;margin-right:-.24em;color:#f4f6f7}
-.bk-word span{font:500 clamp(11px,1.8vw,16px)/1 var(--f-ui);letter-spacing:1.1em;margin-right:-1.1em;color:#7fd1e8}
-.flake{width:clamp(70px,12vw,110px);animation:spin 18s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ww-word{font:clamp(54px,12vw,128px)/1 Audiowide,var(--f-ui);background:linear-gradient(180deg,#fff 0%,#c9f2ff 42%,#58bfe6 58%,#e6fbff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(120,220,255,.45))}
-.ww-sub{font:600 clamp(11px,1.6vw,14px)/1 var(--f-ui);letter-spacing:.5em;margin-right:-.5em;color:#a8dcef}
-.monolith{width:clamp(44px,7vw,64px);filter:drop-shadow(0 0 30px rgba(201,163,90,.25))}
-.mg-word{font:600 clamp(20px,4.4vw,42px)/1.1 var(--f-epic);letter-spacing:.32em;margin-right:-.32em;color:#d8bb7a}
-.mg-sub{font:italic 400 clamp(14px,2vw,18px)/1 Georgia,serif;color:#9b8a68;letter-spacing:.2em}
-#skip{position:absolute;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:10px;font:600 11px var(--f-ui);letter-spacing:.14em;color:#8b949a;opacity:.55;transition:opacity .3s}
-#skip.hot{opacity:1;color:var(--ink)}
-#skip svg{width:30px;height:30px;transform:rotate(-90deg)}
-#skip circle{fill:none;stroke-width:3}
-.sk-bg{stroke:rgba(233,238,242,.2)}.sk-fg{stroke:var(--gold);stroke-dasharray:94.25;stroke-dashoffset:94.25}
+/*
+ * Middleware logo intro: one card per fake technology partner, then the publisher.
+ */
+
+
+/* --- Logo cards --- */
+#intro {
+	background: #000;
+	cursor: none;
+	touch-action: none;
+}
+
+.logo-card {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	opacity: 0;
+	filter: blur(8px);
+	transform: scale(1.04);
+	transition: opacity 0.8s ease, filter 0.9s ease, transform 3.2s ease-out;
+	text-align: center;
+	padding: 0 24px;
+}
+
+.logo-card.is-active {
+	opacity: 1;
+	filter: blur(0);
+	transform: scale(1);
+}
+
+.logo-legal {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+	margin: 0;
+	padding: 0 24px;
+	font: 11px/1.6 var(--font-ui);
+	color: #6f777d;
+	letter-spacing: 0.03em;
+}
+
+
+/* --- Unreality Engine --- */
+.engine-logo {
+	width: clamp(90px, 16vw, 140px);
+	overflow: visible;
+}
+
+.engine-logo path,
+.engine-logo polygon {
+	stroke-dasharray: 320;
+	stroke-dashoffset: 320;
+	transition: stroke-dashoffset 1.6s cubic-bezier(0.6, 0, 0.2, 1);
+}
+
+.logo-card.is-active .engine-logo path,
+.logo-card.is-active .engine-logo polygon {
+	stroke-dashoffset: 0;
+}
+
+.logo-card.is-active .engine-logo .engine-logo-middle {
+	transition-delay: 0.25s;
+}
+
+.logo-card.is-active .engine-logo .engine-logo-inner {
+	transition-delay: 0.45s;
+}
+
+.engine-name {
+	font: clamp(26px, 5.4vw, 52px)/1 Michroma, var(--font-ui);
+	letter-spacing: 0.32em;
+	margin-right: -0.32em;
+	color: #f2f5f7;
+}
+
+.engine-subtitle {
+	font: 400 clamp(11px, 1.6vw, 15px)/1 Michroma, var(--font-ui);
+	letter-spacing: 0.7em;
+	margin-right: -0.7em;
+	color: #8fa2ad;
+}
+
+.engine-subtitle b {
+	color: #8fd3ff;
+	font-weight: 400;
+}
+
+
+/* --- Mayhem Physics: the letters drop in, the last one topples over --- */
+.physics-logo {
+	display: flex;
+	font: clamp(46px, 11vw, 120px)/1 "Russo One", var(--font-ui);
+	color: #ff8a1f;
+	text-shadow: 0 0.06em 0 #6b2a00, 0 0 40px rgba(255, 120, 20, 0.35);
+}
+
+.physics-logo span {
+	display: inline-block;
+	transform: translateY(-120vh) rotate(var(--start-angle));
+	transform-origin: 80% 100%;
+}
+
+.logo-card.is-active .physics-logo span {
+	animation: physics-letter-drop 0.95s cubic-bezier(0.4, 0, 0.7, 1) var(--drop-delay) forwards;
+}
+
+.logo-card.is-active .physics-logo span.toppling-letter {
+	animation: physics-letter-drop 0.95s cubic-bezier(0.4, 0, 0.7, 1) var(--drop-delay) forwards, physics-letter-topple 0.55s cubic-bezier(0.5, 0, 0.9, 0.5) calc(var(--drop-delay) + 1.25s) forwards;
+}
+
+@keyframes physics-letter-drop {
+	0% {
+		transform: translateY(-120vh) rotate(var(--start-angle));
+	}
+	58% {
+		transform: translateY(0) rotate(var(--end-angle));
+	}
+	70% {
+		transform: translateY(-0.22em) rotate(var(--end-angle));
+	}
+	82% {
+		transform: translateY(0) rotate(var(--end-angle));
+	}
+	91% {
+		transform: translateY(-0.05em) rotate(var(--end-angle));
+	}
+	100% {
+		transform: translateY(0) rotate(var(--end-angle));
+	}
+}
+
+@keyframes physics-letter-topple {
+	from {
+		transform: rotate(var(--end-angle));
+	}
+	to {
+		transform: translate(0.08em, 0.04em) rotate(34deg);
+	}
+}
+
+.physics-subtitle {
+	font: 600 clamp(12px, 2vw, 18px)/1 var(--font-ui);
+	letter-spacing: 0.55em;
+	margin-right: -0.55em;
+	color: #d9c4b0;
+}
+
+
+/* --- Blink Video: the eye blinks and looks around --- */
+.video-logo {
+	width: clamp(150px, 26vw, 240px);
+	overflow: visible;
+}
+
+.video-logo .eye-lid {
+	transform-box: fill-box;
+	transform-origin: 50% 0;
+	transform: scaleY(0);
+}
+
+.logo-card.is-active .video-logo .eye-lid {
+	animation: eye-blink 2.4s ease-in-out 0.9s;
+}
+
+.logo-card.is-active .video-logo .eye-iris {
+	animation: eye-look 2.6s ease-in-out 0.2s;
+}
+
+@keyframes eye-blink {
+	0% {
+		transform: scaleY(0);
+	}
+	9% {
+		transform: scaleY(1);
+	}
+	17% {
+		transform: scaleY(0);
+	}
+	100% {
+		transform: scaleY(0);
+	}
+}
+
+@keyframes eye-look {
+	0%, 100% {
+		transform: translateX(0);
+	}
+	30% {
+		transform: translateX(-14px);
+	}
+	65% {
+		transform: translateX(12px);
+	}
+}
+
+.video-name {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	font: 600 clamp(50px, 11vw, 110px)/0.8 var(--font-numbers);
+	letter-spacing: 0.24em;
+	margin-right: -0.24em;
+	color: #f4f6f7;
+}
+
+.video-name span {
+	font: 500 clamp(11px, 1.8vw, 16px)/1 var(--font-ui);
+	letter-spacing: 1.1em;
+	margin-right: -1.1em;
+	color: #7fd1e8;
+}
+
+
+/* --- WWice audio --- */
+.audio-logo {
+	width: clamp(70px, 12vw, 110px);
+	animation: spin 18s linear infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.audio-name {
+	font: clamp(54px, 12vw, 128px)/1 Audiowide, var(--font-ui);
+	background: linear-gradient(180deg, #fff 0%, #c9f2ff 42%, #58bfe6 58%, #e6fbff 100%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	filter: drop-shadow(0 0 18px rgba(120, 220, 255, 0.45));
+}
+
+.audio-subtitle {
+	font: 600 clamp(11px, 1.6vw, 14px)/1 var(--font-ui);
+	letter-spacing: 0.5em;
+	margin-right: -0.5em;
+	color: #a8dcef;
+}
+
+
+/* --- Megalith Interactive --- */
+.publisher-logo {
+	width: clamp(44px, 7vw, 64px);
+	filter: drop-shadow(0 0 30px rgba(201, 163, 90, 0.25));
+}
+
+.publisher-name {
+	font: 600 clamp(20px, 4.4vw, 42px)/1.1 var(--font-epic);
+	letter-spacing: 0.32em;
+	margin-right: -0.32em;
+	color: #d8bb7a;
+}
+
+.publisher-presents {
+	font: italic 400 clamp(14px, 2vw, 18px)/1 Georgia, serif;
+	color: #9b8a68;
+	letter-spacing: 0.2em;
+}
+
+
+/* --- Hold-to-skip hint --- */
+#skip-hint {
+	position: absolute;
+	right: max(20px, env(safe-area-inset-right, 0px));
+	bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font: 600 11px var(--font-ui);
+	letter-spacing: 0.14em;
+	color: #8b949a;
+	opacity: 0.55;
+	transition: opacity 0.3s;
+}
+
+#skip-hint.is-holding {
+	opacity: 1;
+	color: var(--ink);
+}
+
+#skip-hint svg {
+	width: 30px;
+	height: 30px;
+	transform: rotate(-90deg);
+}
+
+#skip-hint circle {
+	fill: none;
+	stroke-width: 3;
+}
+
+.skip-ring-track {
+	stroke: rgba(233, 238, 242, 0.2);
+}
+
+.skip-ring-progress {
+	stroke: var(--gold);
+	stroke-dasharray: 94.25;
+	stroke-dashoffset: 94.25;
+}
